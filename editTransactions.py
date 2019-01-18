@@ -1,0 +1,67 @@
+from datetime import *
+from pathlib import Path
+import pandas as pd
+
+transactionsFileName = 'data.csv'
+fileInPath = Path(transactionsFileName)
+
+def deleteTransaction(row):
+    if fileInPath.exists():
+        transactionsList = pd.read_csv('data.csv', sep='\t')
+    else:
+        print("Nothing to delete!")
+        return
+
+    transactionsList = transactionsList.drop(row)
+    # transactionsList.index = range(len(transactionsList.index))
+    print(transactionsList)
+    transactionsList.to_csv('data.csv', sep='\t', index=False)
+
+
+def addNewTransaction():
+    todayDate = date.today
+    columnNames = ['Type', 'Date', 'Stock Symbol', 'Quantity', 'Price', 'Total Amount']
+    if fileInPath.exists():
+        transactionsList = pd.read_csv('data.csv', sep='\t')
+    else:
+        transactionsList = pd.DataFrame(columns=columnNames)
+
+    typeInput = input("Transaction type (buy/sell):")
+    dateInput = input("Date (YYYY-MM-DD):")
+    stockInput = input("Stock name:")
+    quantInput = int(input("Quantity:"))
+    priceInput = float(input("Unit price:"))
+    calcCost = priceInput * quantInput
+
+    if not dateInput:
+        dateInput = todayDate
+
+    transactionsList.loc[transactionsList.shape[0]] = [dateInput, typeInput, stockInput, quantInput, priceInput,
+                                                       calcCost]
+
+    print(transactionsList)
+    transactionsList.to_csv('data.csv', sep='\t', index=False)
+
+
+def viewTransactions():
+    if fileInPath.exists():
+        transactionsList = pd.read_csv('data.csv', sep='\t')
+        print(transactionsList)
+    else:
+        print("Nothing to see!")
+
+
+def editListElement(row, column, newVal):
+    if fileInPath.exists():
+        transactionsList = pd.read_csv('data.csv', sep='\t')
+    else:
+        print("Nothing to edit!")
+    transactionsList.loc[row, column] = newVal
+
+    transactionsList.loc[row, 'Total Amount'] = transactionsList.loc[row, 'Price'] * transactionsList.loc[row, 'Quantity']
+    print(transactionsList)
+    transactionsList.to_csv('data.csv', sep='\t', index=False)
+
+viewTransactions()
+# addNewTransaction()
+# editListElement(40, 'Type', 'sell')
