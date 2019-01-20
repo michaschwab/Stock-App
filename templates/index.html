@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="files/style.css"/>
+</head>
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class = "col-md-3">
+      <form method="post" action="/add-transaction/" target="dummyframe">
+        <div class="form-group">
+          <label for="formGroupExampleInput">Transaction Type</label>
+          <div class = "form-group">
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="buySell" id="buyButton" value="buy">
+              <label class="form-check-label" for="buyButton">Buy</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="buySell" id="sellButton" value="sell">
+              <label class="form-check-label" for="sellButton">Sell</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="dateText">Date</label>
+          <input type="text" class="form-control" id="dateText" name="dateInput" placeholder="YYYY-MM-DD">
+        </div>
+        <div class="form-group">
+          <label for="stockText">Stock Symbol</label>
+          <input type="text" class="form-control" id="stockText" name="stockInput" placeholder="MSFT">
+        </div>
+        <div class="form-group">
+          <label for="quantityText">Quantity</label>
+          <input type="text" class="form-control" id="quantityText" name="quantityInput" placeholder="20">
+        </div>
+        <div class="form-group">
+          <label for="priceText">Price</label>
+          <input type="text" class="form-control" id="priceText" name="priceInput" placeholder="102.2">
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary mb-2">Add Transaction</button>
+        </div>
+      </form>
+      <div class="form-group">
+        <a href="" onclick="view_transactions(); return false;" class="btn btn-primary mb-2">View Transactions</a>
+      </div>
+      <div class="form-group">
+        <a href="" onclick="generate_overview();return false;" class="btn btn-primary mb-2">Generate Overview</a>
+      </div>
+    </div>
+    <div class = "col-md-9">
+      <div class="row">
+        <div class = "col-sm-6">
+          <form>
+            <div class="form-group">
+              <label for="textDisplayArea">Text Output:</label>
+              <div id="textDisplayArea" style="height: 350px"></div>
+            </div>
+          </form>
+        </div>
+        <div class = "col-sm-6">
+          <div id = "pieTitle">
+          </div>
+          <div id = "pieChart">
+          </div>
+        </div>
+      </div>
+      <div class = "row">
+        <div class = "col-md-12">
+          <div id = "lineGraph">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<iframe width="0" height="0" border="0" name="dummyframe" id="dummyframe"></iframe>
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="files/main.js"></script>
+<script src="files/d3pie.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -110,6 +110,16 @@ def plotTotalHoldings(summaryDF):
     plt.title(titleString)
     plt.show()
 
+    def onpick(event):
+        thisline = event.artist
+        xdata = thisline.get_xdata()
+        ydata = thisline.get_ydata()
+        ind = event.ind
+        points = tuple(zip(xdata[ind], ydata[ind]))
+        print('onpick points:', points)
+
+    plt.canvas.mpl_connect('pick_event', onpick)
+
 
 def analyzePeriod(stock, startDate, endDate):
     dataFrame = lookupPriceRange(stock, startDate, endDate)
@@ -191,15 +201,14 @@ def nDayMovingStd(series, n):
 def generateAllCharts():
     stringToday = str(date.today())
     startDate = '2017-01-01'
-    stockNames = getStocksList(transactionsList)
-
+    dataFrame = makeSummaryDF()
+    stockNames = dataFrame['Stock Symbol']
     for i, stock in enumerate(stockNames):
         plt.figure(i)
         analyzePeriod(stock, startDate, stringToday)
 
     plt.show()
-
-# generateAllCharts()
+    return dataFrame
 
 
 def generateChart(name, startDate):
@@ -209,10 +218,13 @@ def generateChart(name, startDate):
     analyzePeriod(name, startDate, stringToday)
     plt.show()
 
-DF = makeSummaryDF()
-generateChart('COLM', '2016-08-01')
-# generateAllCharts()
 
 
+
+#generateChart('VTI', '2016-08-01')
+# DF = generateAllCharts()
+
+
+# DF = makeSummaryDF()
 # plotTotalHoldings(DF)
 

@@ -1,9 +1,11 @@
 from datetime import *
 from pathlib import Path
 import pandas as pd
+import numpy as np
 
 transactionsFileName = 'data.csv'
 fileInPath = Path(transactionsFileName)
+
 
 def deleteTransaction(row):
     if fileInPath.exists():
@@ -31,7 +33,7 @@ def addNewTransaction():
     stockInput = input("Stock name:")
     quantInput = int(input("Quantity:"))
     priceInput = float(input("Unit price:"))
-    calcCost = priceInput * quantInput
+    calcCost = np.round(priceInput * quantInput, 2)
 
     if not dateInput:
         dateInput = todayDate
@@ -43,12 +45,33 @@ def addNewTransaction():
     transactionsList.to_csv('data.csv', sep='\t', index=False)
 
 
+def addNewTransactionNoPrompt(typeInput, dateInput, stockInput, quantInput, priceInput):
+    todayDate = date.today
+    columnNames = ['Type', 'Date', 'Stock Symbol', 'Quantity', 'Price', 'Total Amount']
+    if fileInPath.exists():
+        transactionsList = pd.read_csv('data.csv', sep='\t')
+    else:
+        transactionsList = pd.DataFrame(columns=columnNames)
+    quantInput = int(quantInput)
+    priceInput = float(priceInput)
+    calcCost = np.round(priceInput * quantInput, 2)
+
+    if not dateInput:
+        dateInput = todayDate
+
+    transactionsList.loc[transactionsList.shape[0]] = [dateInput, typeInput, stockInput, quantInput, priceInput,
+                                                       calcCost]
+    print(transactionsList)
+    transactionsList.to_csv('data.csv', sep='\t', index=False)
+
+
 def viewTransactions():
     if fileInPath.exists():
         transactionsList = pd.read_csv('data.csv', sep='\t')
         print(transactionsList)
     else:
         print("Nothing to see!")
+    return transactionsList
 
 
 def editListElement(row, column, newVal):
@@ -59,9 +82,13 @@ def editListElement(row, column, newVal):
     transactionsList.loc[row, column] = newVal
 
     transactionsList.loc[row, 'Total Amount'] = transactionsList.loc[row, 'Price'] * transactionsList.loc[row, 'Quantity']
+
+    transactionsList['Total Amount'] = np.round(transactionsList['Total Amount'], 2)
     print(transactionsList)
     transactionsList.to_csv('data.csv', sep='\t', index=False)
 
-viewTransactions()
+
+# viewTransactions()
 # addNewTransaction()
-# editListElement(40, 'Type', 'sell')
+# editListElement(42, 'Type', 'sell')
+deleteTransaction(43)

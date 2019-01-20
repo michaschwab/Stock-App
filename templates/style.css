@@ -1,0 +1,28 @@
+.container {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+div #textDisplayArea th, div #textDisplayArea td {
+padding-left: 4px;
+padding-right: 4px;
+font-size: .9rem;
+}
+
+div #textDisplayArea {
+overflow: scroll;
+}
+
+.textLabels {
+text-anchor: middle;
+}
+
+.textNumbers {
+text-anchor: middle;
+font-size: .7rem;
+fill: white;}
+
+
+div .pieTitle {
+fill: #888;
+}
