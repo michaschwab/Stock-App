@@ -49,6 +49,7 @@
       <div class="form-group">
         <a href="" onclick="generate_overview();return false;" class="btn btn-primary mb-2">Generate Overview</a>
       </div>
+
     </div>
     <div class = "col-md-9">
       <div class="row">
@@ -56,7 +57,7 @@
           <form>
             <div class="form-group">
               <label for="textDisplayArea">Text Output:</label>
-              <div id="textDisplayArea" style="height: 350px"></div>
+              <div id="textDisplayArea" style="height: 300px"></div>
             </div>
           </form>
         </div>
@@ -69,8 +70,7 @@
       </div>
       <div class = "row">
         <div class = "col-md-12">
-          <div id = "lineGraph">
-          </div>
+          <div id="lineGraph" style="height: 300px; width: 100%;"></div>
         </div>
       </div>
     </div>
@@ -80,10 +80,10 @@
 <iframe width="0" height="0" border="0" name="dummyframe" id="dummyframe"></iframe>
 
 <script src="https://d3js.org/d3.v5.min.js"></script>
-<script src="files/main.js"></script>
-<script src="files/d3pie.min.js"></script>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="files/main.js"></script>
 </body>
 </html>

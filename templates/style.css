@@ -11,6 +11,7 @@ font-size: .9rem;
 
 div #textDisplayArea {
 overflow: scroll;
+overflow-x: hidden;
 }
 
 .textLabels {
@@ -20,9 +21,17 @@ text-anchor: middle;
 .textNumbers {
 text-anchor: middle;
 font-size: .7rem;
-fill: white;}
+fill: black;
+fill-opacity: 0;
+}
 
 
 div .pieTitle {
 fill: #888;
 }
+
+.arc {
+cursor: pointer;}
+
+.arc:hover {
+fill-opacity: .5;}

@@ -19,16 +19,14 @@ function generate_overview() {
         });
 
         var color = d3.scaleOrdinal(d3.schemeSet3);
-        var width=420;
-        var height=420;
-        var r = 130;
-        var tran = width/2, tran_y = tran+20;
+        var width=350;
+        var height=370;
+        var r = 120;
+        var tran = width/2, tran_y = height/2+40;
 
         var pie = d3.pie()
             .sort(null)
             .value(function(d){return d["Current Value"]})(data);
-
-        console.log(pie)
 
         var arc = d3.arc()
             .outerRadius(r)
@@ -54,8 +52,13 @@ function generate_overview() {
         var allArcs = svg.selectAll("arc")
             .data(pie)
             .enter()
-                .append("g")
-                    .attr("class","arc");
+            .append("g")
+            .attr("class","arc")
+            .on('click', function(d,i){
+                var stockName = d.data["Stock Symbol"];
+                drawGraph(stockName);return false
+                });
+
 
         allArcs.append("path")
             .attr("d",arc)
@@ -88,6 +91,50 @@ function generate_overview() {
             .attr("class","pieTitle")
 
     });
+}
+
+
+function drawGraph(stock) {
+    //first get the data
+    console.log(stock)
+    d3.csv('/get-time-series-data/'+stock)
+    .then(function(data){
+        var chart = new CanvasJS.Chart("lineGraph", {
+            theme: "light2", // "light1", "light2", "dark1", "dark2"
+            animationEnabled: true,
+            zoomEnabled: true,
+            title: {
+                text: stock
+            },
+            axisX: {
+                valueFormatString: "YYYY-MM-DD"
+            },
+            axisY: {
+                title: "Closing price ($)",
+                includeZero: false
+            },
+            data: [{
+                type: "line",
+                dataPoints: []
+            }]
+        });
+
+        addDataPoints(data);
+        chart.render();
+
+        function addDataPoints(dataInput) {
+            var noOfDps = dataInput.length;
+            for(var i = 0; i < noOfDps; i++) {
+                var parts =data[i].Date.split('-');
+                // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
+                // January - 0, February - 1, etc.
+                var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
+                xVal = mydate
+                yVal = Number(data[i].Close)
+                chart.options.data[0].dataPoints.push({x: xVal, y: yVal});
+            }
+        }
+    })
 }
 
 

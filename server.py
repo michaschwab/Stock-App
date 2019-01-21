@@ -36,6 +36,16 @@ def overview_table():
     return csvData
 
 
+@app.route('/get-time-series-data/<stockName>')
+def get_time_series(stockName):
+    # stockName = "NVDA"
+    stringToday = str(date.today())
+    startDate = "2015-01-01"
+    dataSeries = lookupPriceRange(stockName, startDate, stringToday)
+    csvData = dataSeries.to_csv(header=True)
+    return csvData
+
+
 @app.route('/files/<path:path>')
 def send_js(path):
     return send_from_directory('templates', path)

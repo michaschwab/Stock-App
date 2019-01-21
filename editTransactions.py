@@ -91,4 +91,4 @@ def editListElement(row, column, newVal):
 # viewTransactions()
 # addNewTransaction()
 # editListElement(42, 'Type', 'sell')
-deleteTransaction(43)
+# deleteTransaction(43)
