@@ -96,7 +96,6 @@ function generate_overview() {
 
 function drawGraph(stock) {
     //first get the data
-    console.log(stock)
     d3.csv('/get-time-series-data/'+stock)
     .then(function(data){
         var chart = new CanvasJS.Chart("lineGraph", {
@@ -115,14 +114,23 @@ function drawGraph(stock) {
             },
             data: [{
                 type: "line",
+                name: "Price",
+                dataPoints: []
+            },
+            { type: "scatter",
+                name: "Buy Points",
+                dataPoints: []
+            },
+            {type: "scatter",
+                name: "Sell Points",
                 dataPoints: []
             }]
         });
 
-        addDataPoints(data);
+        addDataPoints(data,0);
         chart.render();
 
-        function addDataPoints(dataInput) {
+        function addDataPoints(dataInput,lineID) {
             var noOfDps = dataInput.length;
             for(var i = 0; i < noOfDps; i++) {
                 var parts =data[i].Date.split('-');
@@ -131,7 +139,7 @@ function drawGraph(stock) {
                 var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
                 xVal = mydate
                 yVal = Number(data[i].Close)
-                chart.options.data[0].dataPoints.push({x: xVal, y: yVal});
+                chart.options.data[lineID].dataPoints.push({x: xVal, y: yVal});
             }
         }
     })

@@ -121,14 +121,18 @@ def plotTotalHoldings(summaryDF):
     plt.canvas.mpl_connect('pick_event', onpick)
 
 
+def getBuySellPoints(stock, typeBS, startDate, endDate):
+    transLines = getAllTransactions(stock)
+    buySellRows = transLines[typeBS]
+    buySellPoints = buySellRows[(buySellRows['Date'] > startDate) & (buySellRows['Date'] <= endDate)]
+    return buySellPoints
+
+
 def analyzePeriod(stock, startDate, endDate):
     dataFrame = lookupPriceRange(stock, startDate, endDate)
-    transLines = getAllTransactions(stock)
 
-    buyRows = transLines['buy']
-    sellRows = transLines['sell']
-    buyPoints = buyRows[(buyRows['Date'] > startDate) & (buyRows['Date'] <= endDate)]
-    sellPoints = sellRows[(sellRows['Date'] > startDate) & (sellRows['Date'] <= endDate)]
+    buyPoints = getBuySellPoints(stock, 'buy', startDate, endDate)
+    sellPoints = getBuySellPoints(stock, 'sell', startDate, endDate)
 
     # Moving averages (10, 50, 200)
     SMA20 = nDayMovingAverage(dataFrame, 20)

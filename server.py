@@ -38,11 +38,14 @@ def overview_table():
 
 @app.route('/get-time-series-data/<stockName>')
 def get_time_series(stockName):
-    # stockName = "NVDA"
     stringToday = str(date.today())
     startDate = "2015-01-01"
     dataSeries = lookupPriceRange(stockName, startDate, stringToday)
     csvData = dataSeries.to_csv(header=True)
+    # buyPoints = getBuySellPoints(stockName, 'buy', startDate, stringToday)
+    # csvBuy = buyPoints.to_csv(header=True)
+    # sellPoints = getBuySellPoints(stockName, 'sell', startDate, stringToday)
+    # csvSell = sellPoints.to_csv(header=True)
     return csvData
 
 
