@@ -59,10 +59,12 @@ def addNewTransactionNoPrompt(typeInput, dateInput, stockInput, quantInput, pric
     if not dateInput:
         dateInput = todayDate
 
-    transactionsList.loc[transactionsList.shape[0]] = [dateInput, typeInput, stockInput, quantInput, priceInput,
-                                                       calcCost]
-    print(transactionsList)
+    indexNew = transactionsList.shape[0]
+    transactionsList.loc[indexNew] = [dateInput, typeInput, stockInput, quantInput, priceInput,
+                                      calcCost]
     transactionsList.to_csv('data.csv', sep='\t', index=False)
+    print(transactionsList)
+    return indexNew
 
 
 def viewTransactions():
@@ -91,4 +93,5 @@ def editListElement(row, column, newVal):
 # viewTransactions()
 # addNewTransaction()
 # editListElement(42, 'Type', 'sell')
+# deleteTransaction(43)
 # deleteTransaction(43)

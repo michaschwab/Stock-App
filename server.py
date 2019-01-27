@@ -1,13 +1,15 @@
-from flask import Flask, render_template, send_from_directory, request
+from flask import Flask, render_template, send_from_directory, request, Response
 from editTransactions import *
 from analyzeStocks import *
+import json
 
 app = Flask(__name__)
+stringToday = str(date.today())
 
 
 @app.route('/')
 def index():
-  return render_template('index.html')
+    return render_template('index.html')
 
 
 @app.route('/add-transaction/', methods=['post', 'get'])
@@ -17,35 +19,45 @@ def add_transaction():
     stockInput = request.form['stockInput']
     quantityInput = request.form['quantityInput']
     priceInput = request.form['priceInput']
-
-    addNewTransactionNoPrompt(buySellFlag, dateInput, stockInput, quantityInput, priceInput)
-    return render_template('index.html')
+    newIndex = addNewTransactionNoPrompt(buySellFlag, dateInput, stockInput, quantityInput, priceInput)
+    return str(newIndex)
 
 
 @app.route('/get-transactions-data/')
 def view_transactions():
-    transactionsList = viewTransactions()
-    csvData = transactionsList.to_csv()
+    transactionsListLocal = viewTransactions()
+    csvData = transactionsListLocal.to_csv()
     return csvData
 
 
 @app.route('/get-overview-table/')
 def overview_table():
-    dataFrame = makeSummaryDF()
-    csvData = dataFrame.to_csv()
+    dataFrame = makeSummaryDF(stringToday)
+    nonZeroDF = dataFrame.loc[dataFrame['Quantity'] != 0]
+    # columnsDF = nonZeroDF.columns
+    # noStockDF = dataFrame[columnsDF[1:]]
+    csvData = nonZeroDF.to_csv(index=False)
     return csvData
 
 
-@app.route('/get-time-series-data/<stockName>')
-def get_time_series(stockName):
-    stringToday = str(date.today())
-    startDate = "2015-01-01"
-    dataSeries = lookupPriceRange(stockName, startDate, stringToday)
-    csvData = dataSeries.to_csv(header=True)
+@app.route('/get-all-time-series-data/<stockName>')
+def get_all_time_series(stockName):
+    startDate = "2017-01-01"
+    dataSeries = lookupPriceFromTable(stockName, startDate, stringToday)
+    priceData = dataSeries.to_csv(header=True)
+
     # buyPoints = getBuySellPoints(stockName, 'buy', startDate, stringToday)
     # csvBuy = buyPoints.to_csv(header=True)
     # sellPoints = getBuySellPoints(stockName, 'sell', startDate, stringToday)
     # csvSell = sellPoints.to_csv(header=True)
+    return Response(json.dumps({'priceData': priceData}), mimetype='application/json')
+
+
+@app.route('/get-time-series-data/<stockName>')
+def get_time_series(stockName):
+    startDate = "2017-01-01"
+    dataSeries = lookupPriceFromTable(stockName, startDate, stringToday)
+    csvData = dataSeries.to_csv(header=True)
     return csvData
 
 
@@ -55,4 +67,4 @@ def send_js(path):
 
 
 if __name__ == '__main__':
-  app.run(debug=True)
+  app.run(debug=False)

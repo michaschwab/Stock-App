@@ -1,9 +1,35 @@
 
-function view_transactions() {
+function view_transactions(index) {
     d3.csv('/get-transactions-data/').then(function(data){
-    tabulate(data, data.columns);
+        tabulate(data, data.columns);
+        if (index !== undefined){
+            var allRows = document.querySelectorAll('#textDisplayArea tr');
+            var thisRow = allRows[index+1];
+
+            var allTD = thisRow.querySelectorAll('td');
+            var firstTD = allTD[0];
+            firstTD.scrollIntoView({block: "end", behavior: "smooth"});
+            d3.select(thisRow).style('background-color','white')
+                .transition().delay(200)
+                .duration(500)
+                .style('background-color', 'rgb(255, 243, 212)')
+                .transition()
+                .duration(800)
+                .style('background-color','white');
+        }
     });
-    }
+}
+
+function add_transaction() {
+    var dataIn= $('#addTransactionForm').serializeArray().reduce(function(obj, item) {
+        obj[item.name] = item.value;
+        return obj;
+    }, {});
+    $.post('/add-transaction/', dataIn, function(response) {
+        var newIndex = parseInt(response);
+        view_transactions(newIndex);
+    });
+}
 
 function generate_overview() {
     document.body.style.cursor = 'wait';
@@ -42,6 +68,7 @@ function generate_overview() {
             .outerRadius(r -40)
             .innerRadius(r -40);
 
+        d3.select('#pieChart').html("");
         var svg = d3.select('#pieChart')
             .append('svg')
             .attr('width',width)
@@ -87,17 +114,48 @@ function generate_overview() {
             .attr("y", -180)
             .attr("text-anchor", "middle")
             .style("font-size", ".9rem")
-            .text("Total current value: $"+totalPositions)
+            .text("Total current value: $"+totalPositions.toFixed(2))
             .attr("class","pieTitle")
 
     });
 }
 
+//function loadData() {
+//    $.get('/get-all-data').then(function(data) {
+//        var graph1Data = data.graph1Data;
+//        var graph2Data = data.graph2Data;
+//        var graph3Data = data.graph3Data;
+//
+//    });
+//    d3.csv('/get-time-series-data/'+stock).then(function(data1) {
+//        d3.csv('..').then(function(data2)) {
+//
+//        });
+//    })
+//}
+
+function parseCSV(string) {
+    var rows = string.split('\n');
+    var headers = rows[0].split(',');
+    var parsedCSV =[];
+    for(var i = 1; i < rows.length; i++){
+        var thisRow = rows[i].split(',');
+        var rowObj = {};
+        for(var j =0; j < thisRow.length; j++){
+            rowObj[headers[j]] = thisRow[j];
+        }
+        parsedCSV.push(rowObj)
+    }
+    return parsedCSV
+}
+
 
 function drawGraph(stock) {
     //first get the data
-    d3.csv('/get-time-series-data/'+stock)
-    .then(function(data){
+    $.get('/get-all-time-series-data/'+stock, function(responseData){
+
+        data=parseCSV(responseData.priceData);
+        console.log(data);
         var chart = new CanvasJS.Chart("lineGraph", {
             theme: "light2", // "light1", "light2", "dark1", "dark2"
             animationEnabled: true,
@@ -138,7 +196,7 @@ function drawGraph(stock) {
                 // January - 0, February - 1, etc.
                 var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
                 xVal = mydate
-                yVal = Number(data[i].Close)
+                yVal = Number(data[i][stock])
                 chart.options.data[lineID].dataPoints.push({x: xVal, y: yVal});
             }
         }
