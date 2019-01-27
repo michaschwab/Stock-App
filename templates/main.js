@@ -120,25 +120,13 @@ function generate_overview() {
     });
 }
 
-//function loadData() {
-//    $.get('/get-all-data').then(function(data) {
-//        var graph1Data = data.graph1Data;
-//        var graph2Data = data.graph2Data;
-//        var graph3Data = data.graph3Data;
-//
-//    });
-//    d3.csv('/get-time-series-data/'+stock).then(function(data1) {
-//        d3.csv('..').then(function(data2)) {
-//
-//        });
-//    })
-//}
+
 
 function parseCSV(string) {
     var rows = string.split('\n');
     var headers = rows[0].split(',');
     var parsedCSV =[];
-    for(var i = 1; i < rows.length; i++){
+    for(var i = 1; i < rows.length-1; i++){
         var thisRow = rows[i].split(',');
         var rowObj = {};
         for(var j =0; j < thisRow.length; j++){
@@ -148,14 +136,37 @@ function parseCSV(string) {
     }
     return parsedCSV
 }
+//
+//function parseCSV2(string) {
+//    var rows = string.split('\n');
+//    var header = rows.splice(0).split(',');
+//
+//    return rows.map(function(row) {
+//        var thisRow = row.split(',');
+//        var rowObj = {};
+//        for(var j =0; j < thisRow.length; j++){
+//            rowObj[headers[j]] = thisRow[j];
+//        }
+//        return rowObj;
+//    });
+//}
 
+
+function loadData(stock) {
+}
 
 function drawGraph(stock) {
     //first get the data
     $.get('/get-all-time-series-data/'+stock, function(responseData){
+        var data=parseCSV(responseData.priceData);
+        var buyData = parseCSV(responseData.buyPoints);
+        var sellData = parseCSV(responseData.sellPoints);
+        var SMA20Data = parseCSV(responseData.SMA20);
+        var SMA200Data = parseCSV(responseData.SMA200);
+        var RMS20Data = parseCSV(responseData.RMS20);
+        console.log(RMS20Data)
 
-        data=parseCSV(responseData.priceData);
-        console.log(data);
+
         var chart = new CanvasJS.Chart("lineGraph", {
             theme: "light2", // "light1", "light2", "dark1", "dark2"
             animationEnabled: true,
@@ -170,35 +181,111 @@ function drawGraph(stock) {
                 title: "Closing price ($)",
                 includeZero: false
             },
-            data: [{
+            toolTip: {
+                shared: true
+            },
+            data: [
+            {
+                type: "rangeArea",
+                name: "2-Sigma Volatility",
+                fillOpacity: .8,
+                lineThickness: 0,
+                color: '#D6DEE8',
+                dataPoints: []
+            },
+            {
                 type: "line",
                 name: "Price",
+                color: '#335B8E',
                 dataPoints: []
             },
-            { type: "scatter",
+            {   type: "scatter",
                 name: "Buy Points",
+                markerType: "triangle",
+                markerColor: "#8CBEA3",
+                markerSize: 13,
+                indexLabelFormatter: formatter,
+                indexLabelFontWeight: "bold",
+                indexLabelFontSize: 15,
+                toolTipContent: "Buy {label} at ${y}",
                 dataPoints: []
             },
-            {type: "scatter",
+            {   type: "scatter",
                 name: "Sell Points",
+                markerType: "cross",
+                markerColor: "#CB654F",
+                markerSize: 10,
+                indexLabelFormatter: formatter,
+                indexLabelFontWeight: "bold",
+                indexLabelFontSize: 15,
+                toolTipContent: "Sell {label} at ${y}",
+                dataPoints: []
+            },
+            {
+                type: "line",
+                name: "SMA 20",
+                lineDashType: "dot",
+                lineThickness: 1,
+                toolTipContent: null,
+                color: '##335B8E',
+                dataPoints: []
+            },
+            {
+                type: "line",
+                name: "SMA 200",
+                lineDashType: "dot",
+                lineThickness: 2,
+                toolTipContent: null,
+                color: '#B66E56',
                 dataPoints: []
             }]
         });
 
-        addDataPoints(data,0);
+        addRangePoints(SMA20Data,RMS20Data,0,stock)
+        addDataPoints(data,1,stock,"");
+        addDataPoints(buyData,2,'Price','Quantity')
+        addDataPoints(sellData,3,'Price','Quantity')
+        addDataPoints(SMA20Data,4,stock,'')
+        addDataPoints(SMA200Data,5,stock,'')
+
+        console.log(chart)
+
         chart.render();
 
-        function addDataPoints(dataInput,lineID) {
+        function addDataPoints(dataInput,lineID,yKey,labelKey) {
             var noOfDps = dataInput.length;
             for(var i = 0; i < noOfDps; i++) {
-                var parts =data[i].Date.split('-');
+                var parts =dataInput[i].Date.split('-');
                 // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
                 // January - 0, February - 1, etc.
                 var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
                 xVal = mydate
-                yVal = Number(data[i][stock])
-                chart.options.data[lineID].dataPoints.push({x: xVal, y: yVal});
+                yVal = Number(dataInput[i][yKey])
+                if (labelKey ==""){
+                labelVal = ""} else {
+                labelVal = dataInput[i][labelKey]
+                };
+                chart.options.data[lineID].dataPoints.push({x: xVal, y: yVal, label: labelVal});
             }
+        }
+
+        function addRangePoints(meanInput,stdInput,lineID,yKey) {
+            var noOfDps = meanInput.length;
+            for(var i = 0; i < noOfDps; i++) {
+                var parts =meanInput[i].Date.split('-');
+                // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
+                // January - 0, February - 1, etc.
+                var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
+                xVal = mydate
+                yValHigh = Number(meanInput[i][yKey])+2*Number(stdInput[i][yKey])
+                yValLow = Number(meanInput[i][yKey])-2*Number(stdInput[i][yKey])
+                chart.options.data[lineID].dataPoints.push({x: xVal, y: [yValLow, yValHigh]});
+            }
+        }
+
+        function formatter(e){
+            var quant = Number(e.dataPoint.label);
+            return quant.toFixed(0)
         }
     })
 }

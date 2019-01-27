@@ -181,7 +181,7 @@ def analyzePeriod(stock, startDate, endDate):
     SMA200 = nDayMovingAverage(dataFrame, 200)
 
     # 50-day RMS
-    RMS50 = nDayMovingStd(dataFrame, 50)
+
     RMS20 = nDayMovingStd(dataFrame, 20)
 
     # fig, ax = plt.subplots()
@@ -223,6 +223,7 @@ def analyzePeriod(stock, startDate, endDate):
 def nDayMovingAverage(series, n):
     if series.size > n:
         simpleMovingAvg = series.rolling(window=n, center=False).mean()
+        simpleMovingAvg = simpleMovingAvg[~np.isnan(simpleMovingAvg)]
     else:
         print('Series too short!')
     return simpleMovingAvg
@@ -238,6 +239,7 @@ def nDayMovingAverage(series, n):
 def nDayMovingStd(series, n):
     if series.size > n:
         simpleMovingStd = series.rolling(window=n, center=False).std()
+        simpleMovingStd = simpleMovingStd[~np.isnan(simpleMovingStd)]
     else:
         print('Series too short!')
     return simpleMovingStd

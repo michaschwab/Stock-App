@@ -46,11 +46,24 @@ def get_all_time_series(stockName):
     dataSeries = lookupPriceFromTable(stockName, startDate, stringToday)
     priceData = dataSeries.to_csv(header=True)
 
-    # buyPoints = getBuySellPoints(stockName, 'buy', startDate, stringToday)
-    # csvBuy = buyPoints.to_csv(header=True)
-    # sellPoints = getBuySellPoints(stockName, 'sell', startDate, stringToday)
-    # csvSell = sellPoints.to_csv(header=True)
-    return Response(json.dumps({'priceData': priceData}), mimetype='application/json')
+    filteredDF = filterTransactions(startDate, stringToday)
+    buyPoints = getBuySellPoints(stockName, 'buy', filteredDF)
+    csvBuy = buyPoints.to_csv(header=True)
+    sellPoints = getBuySellPoints(stockName, 'sell', filteredDF)
+    csvSell = sellPoints.to_csv(header=True)
+
+    SMA200 = nDayMovingAverage(dataSeries, 200)
+    SMA20 = nDayMovingAverage(dataSeries, 20)
+
+    csvSMA200 = SMA200.to_csv(header=True)
+    csvSMA20 = SMA20.to_csv(header=True)
+
+    RMS20 = nDayMovingStd(dataSeries, 20)
+    csvRMS20 = RMS20.to_csv(header=True)
+
+    return Response(json.dumps({'priceData': priceData, 'buyPoints': csvBuy, 'sellPoints': csvSell, 'SMA20': csvSMA20,
+                                'SMA200': csvSMA200, 'RMS20': csvRMS20}),
+                    mimetype='application/json')
 
 
 @app.route('/get-time-series-data/<stockName>')
