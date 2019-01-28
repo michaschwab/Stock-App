@@ -31,15 +31,49 @@ function add_transaction() {
     });
 }
 
+
+function delete_transaction() {
+    var dataIn= $('#removeTransactionForm').serializeArray().reduce(function(obj, item) {
+        obj[item.name] = item.value;
+        return obj;
+    }, {});
+    $.post('/delete-transaction/', dataIn, function(response) {
+        var newIndex = parseInt(response);
+        view_transactions();
+    });
+}
+
+
+
+function toggle_position(name) {
+    d3.csv('/get-overview-table/')
+        .then(function(data){
+            tabulate(data, data.columns);
+            if (name !== undefined){
+//                var allRows = document.querySelectorAll('#textDisplayArea tr');
+                var thisRow = $("td").filter(function() {
+                    return $(this).text() == name;
+                }).closest("tr");
+                console.log(thisRow)
+                var allTD = thisRow.find('td');
+                console.log(allTD)
+                var firstTD = allTD[0];
+                firstTD.scrollIntoView({block: "end", behavior: "smooth"});
+                d3.select(thisRow[0]).style('background-color','white')
+                    .transition().delay(200)
+                    .duration(500)
+                    .style('background-color', 'rgb(255, 243, 212)');
+            }
+        })
+}
+
 function generate_overview() {
     document.body.style.cursor = 'wait';
     d3.csv('/get-overview-table/')
     .then(function(data){
-        document.body.style.cursor = 'default';
         tabulate(data, data.columns);
 
 //make pie chart here:
-
         var totalPositions = d3.sum(data, function(d){
         return d["Current Value"];
         });
@@ -83,7 +117,8 @@ function generate_overview() {
             .attr("class","arc")
             .on('click', function(d,i){
                 var stockName = d.data["Stock Symbol"];
-                drawGraph(stockName);return false
+                toggle_position(stockName);
+                loadDataAndGraph(stockName);return false
                 });
 
 
@@ -118,6 +153,9 @@ function generate_overview() {
             .attr("class","pieTitle")
 
     });
+    loadGainLossGraph();
+    $('#positionslabel').addClass('active');
+    $('#transactionslabel').removeClass('active');
 }
 
 
@@ -151,34 +189,29 @@ function parseCSV(string) {
 //    });
 //}
 
-
-function loadData(stock) {
+function loadGainLossGraph() {
+    $.get('/get-gain-loss-data/', function(responseData){
+        var gainLossData = parseCSV(responseData.gainLoss);
+        var VTIData = parseCSV(responseData.VTI);
+        drawGainLoss(gainLossData,VTIData);
+        document.body.style.cursor = 'default';
+    })
 }
 
-function drawGraph(stock) {
+function drawGainLoss(series1, series2) {
     //first get the data
-    $.get('/get-all-time-series-data/'+stock, function(responseData){
-        var data=parseCSV(responseData.priceData);
-        var buyData = parseCSV(responseData.buyPoints);
-        var sellData = parseCSV(responseData.sellPoints);
-        var SMA20Data = parseCSV(responseData.SMA20);
-        var SMA200Data = parseCSV(responseData.SMA200);
-        var RMS20Data = parseCSV(responseData.RMS20);
-        console.log(RMS20Data)
-
-
         var chart = new CanvasJS.Chart("lineGraph", {
             theme: "light2", // "light1", "light2", "dark1", "dark2"
             animationEnabled: true,
             zoomEnabled: true,
             title: {
-                text: stock
+                text: "Active Portfolio Gain/Loss vs Market Index"
             },
             axisX: {
                 valueFormatString: "YYYY-MM-DD"
             },
             axisY: {
-                title: "Closing price ($)",
+                title: "Relative Gain/Loss (%)",
                 includeZero: false
             },
             toolTip: {
@@ -186,68 +219,23 @@ function drawGraph(stock) {
             },
             data: [
             {
-                type: "rangeArea",
-                name: "2-Sigma Volatility",
-                fillOpacity: .8,
-                lineThickness: 0,
-                color: '#D6DEE8',
+                type: "line",
+                name: "My Portfolio",
+                color: '#CB654F',
+                showInLegend: true,
                 dataPoints: []
             },
             {
                 type: "line",
-                name: "Price",
-                color: '#335B8E',
-                dataPoints: []
-            },
-            {   type: "scatter",
-                name: "Buy Points",
-                markerType: "triangle",
-                markerColor: "#8CBEA3",
-                markerSize: 13,
-                indexLabelFormatter: formatter,
-                indexLabelFontWeight: "bold",
-                indexLabelFontSize: 15,
-                toolTipContent: "Buy {label} at ${y}",
-                dataPoints: []
-            },
-            {   type: "scatter",
-                name: "Sell Points",
-                markerType: "cross",
-                markerColor: "#CB654F",
-                markerSize: 10,
-                indexLabelFormatter: formatter,
-                indexLabelFontWeight: "bold",
-                indexLabelFontSize: 15,
-                toolTipContent: "Sell {label} at ${y}",
-                dataPoints: []
-            },
-            {
-                type: "line",
-                name: "SMA 20",
-                lineDashType: "dot",
-                lineThickness: 1,
-                toolTipContent: null,
-                color: '##335B8E',
-                dataPoints: []
-            },
-            {
-                type: "line",
-                name: "SMA 200",
-                lineDashType: "dot",
-                lineThickness: 2,
-                toolTipContent: null,
-                color: '#B66E56',
+                name: "Market Index",
+                color: '#8CBEA3',
+                showInLegend: true,
                 dataPoints: []
             }]
         });
 
-        addRangePoints(SMA20Data,RMS20Data,0,stock)
-        addDataPoints(data,1,stock,"");
-        addDataPoints(buyData,2,'Price','Quantity')
-        addDataPoints(sellData,3,'Price','Quantity')
-        addDataPoints(SMA20Data,4,stock,'')
-        addDataPoints(SMA200Data,5,stock,'')
-
+        addDataPoints(series1,0,'Gain/Loss',"");
+        addDataPoints(series2,1,'VTI',"")
         console.log(chart)
 
         chart.render();
@@ -268,27 +256,220 @@ function drawGraph(stock) {
                 chart.options.data[lineID].dataPoints.push({x: xVal, y: yVal, label: labelVal});
             }
         }
+}
 
-        function addRangePoints(meanInput,stdInput,lineID,yKey) {
-            var noOfDps = meanInput.length;
-            for(var i = 0; i < noOfDps; i++) {
-                var parts =meanInput[i].Date.split('-');
-                // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
-                // January - 0, February - 1, etc.
-                var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
-                xVal = mydate
-                yValHigh = Number(meanInput[i][yKey])+2*Number(stdInput[i][yKey])
-                yValLow = Number(meanInput[i][yKey])-2*Number(stdInput[i][yKey])
-                chart.options.data[lineID].dataPoints.push({x: xVal, y: [yValLow, yValHigh]});
-            }
-        }
 
-        function formatter(e){
-            var quant = Number(e.dataPoint.label);
-            return quant.toFixed(0)
-        }
+function loadDataAndGraph(stock) {
+    $.get('/get-all-time-series-data/'+stock, function(responseData){
+        var data=parseCSV(responseData.priceData);
+        var buyData = parseCSV(responseData.buyPoints);
+        var sellData = parseCSV(responseData.sellPoints);
+        var SMA20Data = parseCSV(responseData.SMA20);
+        var SMA200Data = parseCSV(responseData.SMA200);
+        var RMS20Data = parseCSV(responseData.RMS20);
+        drawGraph(data,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,stock);
     })
 }
+
+
+function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,stock){
+    var divEl = document.getElementById("lineGraph");
+    divEl.innerHTML = "";
+    var chart = new StockLineChart(stock);
+    var parseTime = d3.timeParse("%Y-%m-%d");
+
+    priceData.forEach(function(d) {
+        d.date = parseTime(d.Date);
+        d.close = +d[stock];
+    });
+
+    SMA20Data.forEach(function(d) {
+        d.date = parseTime(d.Date);
+        d.close = +d[stock];
+    });
+
+    SMA200Data.forEach(function(d) {
+        d.date = parseTime(d.Date);
+        d.close = +d[stock];
+    });
+
+    RMS20Data.forEach(function(d) {
+        d.date = parseTime(d.Date);
+        d.close = +d[stock];
+    });
+
+    buyData.forEach(function(d) {
+        d.date = parseTime(d.Date);
+        d.close = +d['Price'];
+        d.label = 'Quantity: '+ d['Quantity'];
+    });
+
+    sellData.forEach(function(d) {
+        d.date = parseTime(d.Date);
+        d.close = +d['Price'];
+        d.label = 'Quantity: '+ d['Quantity'];
+    });
+
+    console.log(priceData)
+    console.log(buyData)
+
+    chart.addBand(SMA20Data.map((d,i) => {
+        return {
+            date: d.date,
+            yMin: d.close - 2*RMS20Data[i].close,
+            yMax: d.close + 2*RMS20Data[i].close
+        }
+    }), 'band', {
+        mark: 'circle',
+        markSize: 3
+    });
+
+    chart.addLine(priceData, 'Closing-Price', {
+        mark: 'circle',
+        markSize: 5,
+        showValue: function(date, value) {
+            return monthNames[date.getMonth()].substr(0,3) + ' ' + date.getDate() + ': $' + value;
+        }
+    });
+
+    var monthNames = [
+        "January", "February", "March",
+        "April", "May", "June", "July",
+        "August", "September", "October",
+        "November", "December"
+    ];
+
+    chart.addLine(SMA20Data, 'SMA-20');
+    chart.addLine(SMA200Data, 'SMA-200');
+
+    chart.addPoints(buyData, 'buy', 'triangle');
+    chart.addPoints(sellData, 'sell', 'triangle');
+}
+
+//
+//function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,stock) {
+//    //first get the data
+//        var chart = new CanvasJS.Chart("lineGraph", {
+//            theme: "light2", // "light1", "light2", "dark1", "dark2"
+//            animationEnabled: true,
+//            zoomEnabled: true,
+//            title: {
+//                text: stock
+//            },
+//            axisX: {
+//                valueFormatString: "YYYY-MM-DD"
+//            },
+//            axisY: {
+//                title: "Closing price ($)",
+//                includeZero: false
+//            },
+//            toolTip: {
+//                shared: false
+//            },
+//            data: [
+//            {
+//                type: "rangeArea",
+//                name: "2-Sigma Volatility",
+//                fillOpacity: .8,
+//                lineThickness: 0,
+//                color: '#D6DEE8',
+//                dataPoints: []
+//            },
+//            {
+//                type: "line",
+//                name: "Price",
+//                color: '#335B8E',
+//                dataPoints: []
+//            },
+//            {   type: "scatter",
+//                name: "Buy Points",
+//                markerType: "triangle",
+//                markerColor: "#8CBEA3",
+//                markerSize: 15,
+//                indexLabelFormatter: formatter,
+//                indexLabelFontWeight: "bold",
+//                indexLabelFontSize: 15,
+//                toolTipContent: "Buy {label} at ${y}",
+//                dataPoints: []
+//            },
+//            {   type: "scatter",
+//                name: "Sell Points",
+//                markerType: "cross",
+//                markerColor: "#CB654F",
+//                markerSize: 12,
+//                indexLabelFormatter: formatter,
+//                indexLabelFontWeight: "bold",
+//                indexLabelFontSize: 15,
+//                toolTipContent: "Sell {label} at ${y}",
+//                dataPoints: []
+//            },
+//            {
+//                type: "line",
+//                name: "SMA 20",
+//                lineDashType: "dot",
+//                lineThickness: 1,
+//                toolTipContent: null,
+//                color: '##335B8E',
+//                dataPoints: []
+//            },
+//            {
+//                type: "line",
+//                name: "SMA 200",
+//                lineDashType: "dot",
+//                lineThickness: 2,
+//                toolTipContent: null,
+//                color: '#B66E56',
+//                dataPoints: []
+//            }]
+//        });
+//
+//        addRangePoints(SMA20Data,RMS20Data,0,stock)
+//        addDataPoints(priceData,1,stock,"");
+//        addDataPoints(buyData,2,'Price','Quantity')
+//        addDataPoints(sellData,3,'Price','Quantity')
+//        addDataPoints(SMA20Data,4,stock,'')
+//        addDataPoints(SMA200Data,5,stock,'')
+//
+//        console.log(chart)
+//
+//        chart.render();
+//
+//        function addDataPoints(dataInput,lineID,yKey,labelKey) {
+//            var noOfDps = dataInput.length;
+//            for(var i = 0; i < noOfDps; i++) {
+//                var parts =dataInput[i].Date.split('-');
+//                // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
+//                // January - 0, February - 1, etc.
+//                var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
+//                xVal = mydate
+//                yVal = Number(dataInput[i][yKey])
+//                if (labelKey ==""){
+//                labelVal = ""} else {
+//                labelVal = dataInput[i][labelKey]
+//                };
+//                chart.options.data[lineID].dataPoints.push({x: xVal, y: yVal, label: labelVal});
+//            }
+//        }
+//
+//        function addRangePoints(meanInput,stdInput,lineID,yKey) {
+//            var noOfDps = meanInput.length;
+//            for(var i = 0; i < noOfDps; i++) {
+//                var parts =meanInput[i].Date.split('-');
+//                // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
+//                // January - 0, February - 1, etc.
+//                var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
+//                xVal = mydate
+//                yValHigh = Number(meanInput[i][yKey])+2*Number(stdInput[i][yKey])
+//                yValLow = Number(meanInput[i][yKey])-2*Number(stdInput[i][yKey])
+//                chart.options.data[lineID].dataPoints.push({x: xVal, y: [yValLow, yValHigh]});
+//            }
+//        }
+//
+//        function formatter(e){
+//            var quant = Number(e.dataPoint.label);
+//            return quant.toFixed(0)
+//        }
+//}
 
 
 function tabulate(data, columns) {

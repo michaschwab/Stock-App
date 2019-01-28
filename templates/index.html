@@ -3,6 +3,7 @@
 <head>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 <link rel="stylesheet" type="text/css" href="files/style.css"/>
+<link rel="stylesheet" type="text/css" href="files/stock-linechart-styles.css"/>
 </head>
 <body>
 
@@ -40,28 +41,46 @@
           <input type="text" class="form-control" id="priceText" name="priceInput" placeholder="102.2">
         </div>
         <div class="form-group">
-          <button type="submit" class="btn btn-primary mb-2">Add Transaction</button>
+          <button type="submit" class="btn btn-info mb-2">Add Transaction</button>
         </div>
       </form>
+      <hr>
+      <form id=removeTransactionForm method="post" onsubmit="delete_transaction(); return false;">
+        <div class="form-group">
+          <label for="rowIndex">Row Number</label>
+          <input type="text" class="form-control" id="rowIndex" name="rowInput" placeholder="43">
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-info mb-2">Remove Transaction</button>
+        </div>
+      </form>
+      <hr>
       <div class="form-group">
-        <a href="" onclick="view_transactions(); return false;" class="btn btn-primary mb-2">View Transactions</a>
-      </div>
-      <div class="form-group">
-        <a href="" onclick="generate_overview();return false;" class="btn btn-primary mb-2">Generate Overview</a>
+        <a href="" onclick="generate_overview();return false;" class="btn btn-danger mb-2">Graph!</a>
       </div>
 
     </div>
     <div class = "col-md-9">
       <div class="row">
-        <div class = "col-sm-6">
+        <div class = "col-sm-7">
           <form>
             <div class="form-group">
-              <label for="textDisplayArea">Text Output:</label>
-              <div id="textDisplayArea" style="height: 300px"></div>
+              <center>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                  <label class="btn btn-info active" onclick="view_transactions(); return false;" id="transactionslabel">
+                    <input type="radio" name="textbox-radio" id="transactions" autocomplete="off" checked> Transactions
+                  </label>
+                  <label class="btn btn-info" onclick="toggle_position();return false;" id="positionslabel">
+                    <input type="radio" name="textbox-radio" id="positions" autocomplete="off"> Positions
+                  </label>
+                </div>
+              </center>
+
+              <div id="textDisplayArea" style="height: 350px"></div>
             </div>
           </form>
         </div>
-        <div class = "col-sm-6">
+        <div class = "col-sm-5">
           <div id = "pieTitle">
           </div>
           <div id = "pieChart">
@@ -70,7 +89,7 @@
       </div>
       <div class = "row">
         <div class = "col-md-12">
-          <div id="lineGraph" style="height: 300px; width: 100%;"></div>
+          <div id="lineGraph" style="height: 335px; width: 100%;"></div>
         </div>
       </div>
     </div>
@@ -86,6 +105,7 @@
   crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="files/stock-linechart.js"></script>
 <script src="files/main.js"></script>
 </body>
 </html>

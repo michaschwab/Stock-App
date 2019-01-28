@@ -14,13 +14,22 @@ def index():
 
 @app.route('/add-transaction/', methods=['post', 'get'])
 def add_transaction():
-    buySellFlag = request.form['buySell']
+    buySellFlag = request.form['buySell']  # takes form name
     dateInput = request.form['dateInput']
     stockInput = request.form['stockInput']
     quantityInput = request.form['quantityInput']
     priceInput = request.form['priceInput']
     newIndex = addNewTransactionNoPrompt(buySellFlag, dateInput, stockInput, quantityInput, priceInput)
     return str(newIndex)
+
+
+@app.route('/delete-transaction/', methods=['post', 'get'])
+def delete_transaction():
+    rowIndex = request.form['rowInput']
+    rowIndexInt = int(rowIndex)
+    print(type(rowIndexInt))
+    deleteTransaction(rowIndexInt)
+    return str(rowIndex)
 
 
 @app.route('/get-transactions-data/')
@@ -66,12 +75,17 @@ def get_all_time_series(stockName):
                     mimetype='application/json')
 
 
-@app.route('/get-time-series-data/<stockName>')
-def get_time_series(stockName):
+@app.route('/get-gain-loss-data/')
+def get_gain_loss():
     startDate = "2017-01-01"
-    dataSeries = lookupPriceFromTable(stockName, startDate, stringToday)
-    csvData = dataSeries.to_csv(header=True)
-    return csvData
+    gainLossSeries, VTICompare = generateGainLossOverTime(startDate)
+    csvGainLoss = gainLossSeries.to_csv(header=True)
+    csvVTI = VTICompare.to_csv(header=True)
+
+    print(csvVTI)
+    print(csvGainLoss)
+    return Response(json.dumps({'gainLoss': csvGainLoss, 'VTI': csvVTI}),
+                    mimetype='application/json')
 
 
 @app.route('/files/<path:path>')

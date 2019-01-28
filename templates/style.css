@@ -4,10 +4,20 @@
   margin-right: auto;
 }
 
+.btn-info.focus {
+box-shadow: none;}
+
+.btn.focus {
+box-shadow: none;}
+
+.btn-group {
+margin: .8rem;
+}
+
 div #textDisplayArea th, div #textDisplayArea td {
 padding-left: 4px;
 padding-right: 4px;
-font-size: .9rem;
+font-size: 1rem;
 }
 
 div #textDisplayArea {
@@ -26,6 +36,13 @@ fill: black;
 fill-opacity: 0;
 }
 
+#pieChart {
+margin: 1rem;
+}
+
+#lineGraph {
+margin-top:1rem;
+}
 
 div .pieTitle {
 fill: #888;

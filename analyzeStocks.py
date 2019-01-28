@@ -289,7 +289,12 @@ def generateGainLossOverTime(startDate):
     VTICompare = ((VTICompare - VTICompare[0])/VTICompare[0])*100
 
     gainLossSeries = pd.Series(data=gainLossPercent, index=rangeDate, name='Gain/Loss')
+    gainLossSeries.index.name = 'Date'
+    return gainLossSeries, VTICompare
 
+
+def plotGainLoss(startDate):
+    gainLossSeries, VTICompare = generateGainLossOverTime(startDate)
     plt.plot(gainLossSeries, label='My Portfolio')
     plt.plot(VTICompare, label='VTI Index')
     plt.title('Gain/Loss Sinze ' + startDate)
@@ -298,15 +303,12 @@ def generateGainLossOverTime(startDate):
     plt.legend()
     plt.show()
 
-    return gainLossSeries, VTICompare
-
-
 # generateChart('COST', '2017-01-01')
 # DF = generateAllCharts('2017-01-01')
 
 #
 # stringToday = str(date.today())
 # DF = makeSummaryDF(stringToday)
-# generateGainLossOverTime('2017-01-01')
+# plotGainLoss('2017-01-01')
 # plotTotalHoldings(DF)
 
