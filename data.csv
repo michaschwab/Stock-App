@@ -42,3 +42,4 @@ Date	Type	StockSymbol	Quantity	Price	Total Amount
 2017-06-05	sell	NVDA	20.0	143.0	2860.0
 2019-01-15	sell	COLM	10.0	84.4	844.0
 2019-01-15	sell	VTI	8.0	134.6	1076.8
+2019-01-29	buy	CLAR	300.0	10.69	3207.0

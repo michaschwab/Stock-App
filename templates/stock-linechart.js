@@ -200,7 +200,7 @@ var StockLineChart = function(stockName) {
                             plot.hover.showValueNode
                                 .attr('x', x(currentX) + 15)
                                 .attr('y', y(currentY) + 5)
-                                .text(plot.hover.showValue(currentX, Math.round(currentY)));
+                                .text(plot.hover.showValue(currentX, Math.round(currentY*100)/100));
                             plot.hover.markNode.select('rect')
                                 .attr('x', x(currentX) + 10)
                                 .attr('y', y(currentY) - 15)

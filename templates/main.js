@@ -301,13 +301,13 @@ function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,sto
     buyData.forEach(function(d) {
         d.date = parseTime(d.Date);
         d.close = +d['Price'];
-        d.label = 'Quantity: '+ d['Quantity'];
+        d.label = 'Quantity: '+ d['Quantity'] +' | Price: '+ d['Price'];
     });
 
     sellData.forEach(function(d) {
         d.date = parseTime(d.Date);
         d.close = +d['Price'];
-        d.label = 'Quantity: '+ d['Quantity'];
+        d.label = 'Quantity: '+ d['Quantity'] +' | Price: '+ d['Price'];
     });
 
     console.log(priceData)
