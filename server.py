@@ -52,6 +52,7 @@ def overview_table():
 @app.route('/get-all-time-series-data/<stockName>')
 def get_all_time_series(stockName):
     startDate = "2017-01-01"
+
     dataSeries = lookupPriceFromTable(stockName, startDate, stringToday)
     priceData = dataSeries.to_csv(header=True)
 

@@ -44,7 +44,6 @@ function delete_transaction() {
 }
 
 
-
 function toggle_position(name) {
     d3.csv('/get-overview-table/')
         .then(function(data){
@@ -256,6 +255,12 @@ function drawGainLoss(series1, series2) {
                 chart.options.data[lineID].dataPoints.push({x: xVal, y: yVal, label: labelVal});
             }
         }
+}
+
+
+function lookup_stock() {
+    var stock = document.getElementById("stockLookup").value;
+    loadDataAndGraph(stock);
 }
 
 
@@ -477,7 +482,6 @@ function tabulate(data, columns) {
 		    .html('');
 		var table = wrapper.append('table')
 		    .classed('table', true);
-		console.log(table);
 		var thead = table.append('thead')
 		var	tbody = table.append('tbody');
 

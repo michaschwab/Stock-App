@@ -45,8 +45,24 @@ transactionsList, globalLookupDF = startUp()
 def lookupPriceFromTable(tickerSymbolList, startDate, endDate):
     startDate = pd.to_datetime(startDate)
     endDate = pd.to_datetime(endDate)
-    df1 = globalLookupDF[tickerSymbolList]
-    df = df1[(df1.index >= startDate) & (df1.index <= endDate)]
+    # df1 = globalLookupDF[tickerSymbolList]
+    # df = df1[(df1.index >= startDate) & (df1.index <= endDate)]
+    # if stock is in the database look it up in database otherwise look it up online
+    dfKeys = globalLookupDF.keys().tolist()
+
+    if isinstance(tickerSymbolList, str):
+        condition = tickerSymbolList in dfKeys
+    else:
+        condition = all(elem in dfKeys for elem in tickerSymbolList)
+
+    if condition:
+        df1 = globalLookupDF[tickerSymbolList]
+        df = df1[(df1.index >= startDate) & (df1.index <= endDate)]
+    else:
+        df1 = lookupPriceRange(tickerSymbolList, startDate, endDate)
+        df1.name = tickerSymbolList
+        df = df1
+
     return df
 
 
