@@ -13,6 +13,9 @@ box-shadow: none;}
 .btn-group {
 margin: .8rem;
 }
+.col-form-label {
+font-weight: bold;
+}
 
 div #textDisplayArea th, div #textDisplayArea td {
 padding-left: 4px;
@@ -25,6 +28,12 @@ overflow: scroll;
 overflow-x: hidden;
 }
 
+hr.thick {
+height: 2px;
+border: none;
+color: #333;
+background-color: #333;}
+
 .textLabels {
 text-anchor: middle;
 }
@@ -34,6 +43,10 @@ text-anchor: middle;
 font-size: .7rem;
 fill: black;
 fill-opacity: 0;
+}
+
+.radioButtons {
+padding-top:.5rem;
 }
 
 #pieChart {

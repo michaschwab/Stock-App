@@ -31,9 +31,12 @@ def startUp():
     else:
         print("Nothing here!")
     globalStocksList = getStocksList(transactionsListLocal).tolist()
-    firstDate = pd.to_datetime(transactionsListLocal['Date']).min()
-    firstDateStr = firstDate.strftime('%Y-%m-%d')
     todayDate = date.today()
+    fiveYearsAgo = todayDate - timedelta(days=5*365)
+    firstDateTransactions = pd.to_datetime(transactionsListLocal['Date']).min()
+    firstDate = min([firstDateTransactions.date(), fiveYearsAgo])
+    firstDateStr = firstDate.strftime('%Y-%m-%d')
+
     todayStr = todayDate.strftime('%Y-%m-%d')
     globalLookupDFLocal = lookupPriceRange(globalStocksList, firstDateStr, todayStr)
     return transactionsListLocal, globalLookupDFLocal
@@ -55,7 +58,15 @@ def lookupPriceFromTable(tickerSymbolList, startDate, endDate):
     else:
         condition = all(elem in dfKeys for elem in tickerSymbolList)
 
-    if condition:
+    todayDate = date.today()
+    fiveYearsAgo = todayDate - timedelta(days=5*365)
+    startDateObj = pd.to_datetime(startDate).date()
+    print(startDateObj)
+
+    inDBRange = startDateObj > fiveYearsAgo
+    print(inDBRange)
+
+    if condition and inDBRange:
         df1 = globalLookupDF[tickerSymbolList]
         df = df1[(df1.index >= startDate) & (df1.index <= endDate)]
     else:
@@ -281,14 +292,23 @@ def generateChart(name, startDate):
     plt.show()
 
 
-def generateGainLossOverTime(startDate):
-    stringToday = str(date.today())
+def generateGainLossOverTime(startDate, endDate):
+    # stringToday = str(date.today())
     # startDate = '2017-02-01'
+    startDateObj = pd.to_datetime(startDate)
+    endDateObj = pd.to_datetime(endDate)
+    diffDays = pd.Timedelta(endDateObj-startDateObj).days
+    print(diffDays)
 
-    rangeDate = pd.date_range(start=startDate, end=stringToday, freq='15D')
+    nPoints = 50
+    frequency = max(round(diffDays/nPoints), 1)
+    freqString = str(frequency)+'D'
+    print(freqString)
+
+    rangeDate = pd.date_range(start=startDate, end=endDate, freq=freqString)
     datesPy = rangeDate.to_pydatetime()
 
-    VTICompare = lookupPriceFromTable('VTI', startDate, stringToday)
+    VTICompare = lookupPriceFromTable('VTI', startDate, endDate)
     gainLoss = []
     totalValue = []
     for i, eachDate in enumerate(datesPy):

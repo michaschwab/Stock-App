@@ -51,12 +51,13 @@ def overview_table():
 
 @app.route('/get-all-time-series-data/<stockName>')
 def get_all_time_series(stockName):
-    startDate = "2017-01-01"
+    startDate = request.args.get('start')
+    endDate = request.args.get('end')
 
-    dataSeries = lookupPriceFromTable(stockName, startDate, stringToday)
+    dataSeries = lookupPriceFromTable(stockName, startDate, endDate)
     priceData = dataSeries.to_csv(header=True)
 
-    filteredDF = filterTransactions(startDate, stringToday)
+    filteredDF = filterTransactions(startDate, endDate)
     buyPoints = getBuySellPoints(stockName, 'buy', filteredDF)
     csvBuy = buyPoints.to_csv(header=True)
     sellPoints = getBuySellPoints(stockName, 'sell', filteredDF)
@@ -78,13 +79,12 @@ def get_all_time_series(stockName):
 
 @app.route('/get-gain-loss-data/')
 def get_gain_loss():
-    startDate = "2017-01-01"
-    gainLossSeries, VTICompare = generateGainLossOverTime(startDate)
+    startDate = request.args.get('start')
+    endDate = request.args.get('end')
+    gainLossSeries, VTICompare = generateGainLossOverTime(startDate,endDate)
     csvGainLoss = gainLossSeries.to_csv(header=True)
     csvVTI = VTICompare.to_csv(header=True)
 
-    print(csvVTI)
-    print(csvGainLoss)
     return Response(json.dumps({'gainLoss': csvGainLoss, 'VTI': csvVTI}),
                     mimetype='application/json')
 

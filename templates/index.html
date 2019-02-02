@@ -10,10 +10,39 @@
 <div class="container-fluid">
   <div class="row">
     <div class = "col-md-3">
+      <div class="form-group col-form-label">
+        Date Range (global):
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="startDateInputID" name="startDateInput" placeholder="Start Date" value="2017-01-01">
+        </div>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="endDateInputID" name="endDateInput" placeholder="End Date">
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="form-group row">
+        <label for="stockLookup" class="col-sm-5 col-form-label">Lookup Stock:</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="stockLookup" name="stockLookupInput" placeholder="TSLA">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <a href="" class="btn btn-info mb-2" onclick="lookup_stock(); return false">Plot Stock</a>
+      </div>
+      <hr>
+      <div class="form-group">
+        <a href="" onclick="generate_overview();return false;" class="btn btn-danger mb-2">Plot Portfolio</a>
+      </div>
+      <hr class ="thick">
       <form id=addTransactionForm method="post" onsubmit="add_transaction(); return false;">
-        <div class="form-group">
-          <label for="formGroupExampleInput">Transaction Type</label>
-          <div class = "form-group">
+        <div class="form-group row">
+          <legend class="col-sm-5 col-form-label">Transaction Type</legend>
+          <div class = "col-sm-7 radioButtons">
             <div class="form-check form-check-inline">
               <input class="form-check-input" type="radio" name="buySell" id="buyButton" value="buy">
               <label class="form-check-label" for="buyButton">Buy</label>
@@ -24,50 +53,46 @@
             </div>
           </div>
         </div>
-        <div class="form-group">
-          <label for="dateText">Date</label>
-          <input type="text" class="form-control" id="dateText" name="dateInput" placeholder="YYYY-MM-DD">
+        <div class="form-group row">
+          <label for="dateText" class="col-sm-5 col-form-label">Date</label>
+          <div class="col-sm-7">
+            <input type="text" class="form-control" id="dateText" name="dateInput" placeholder="YYYY-MM-DD">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="stockText" class="col-sm-5 col-form-label">Stock Symbol</label>
+          <div class="col-sm-7">
+            <input type="text" class="form-control" id="stockText" name="stockInput" placeholder="MSFT">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="quantityText" class="col-sm-5 col-form-label">Quantity</label>
+          <div class="col-sm-7">
+            <input type="text" class="form-control" id="quantityText" name="quantityInput" placeholder="20">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="priceText" class="col-sm-5 col-form-label">Price</label>
+          <div class="col-sm-7">
+            <input type="text" class="form-control" id="priceText" name="priceInput" placeholder="102.2">
+          </div>
         </div>
         <div class="form-group">
-          <label for="stockText">Stock Symbol</label>
-          <input type="text" class="form-control" id="stockText" name="stockInput" placeholder="MSFT">
-        </div>
-        <div class="form-group">
-          <label for="quantityText">Quantity</label>
-          <input type="text" class="form-control" id="quantityText" name="quantityInput" placeholder="20">
-        </div>
-        <div class="form-group">
-          <label for="priceText">Price</label>
-          <input type="text" class="form-control" id="priceText" name="priceInput" placeholder="102.2">
-        </div>
-        <div class="form-group">
-          <button type="submit" class="btn btn-info mb-2">Add Transaction</button>
+            <button type="submit" class="btn btn-info mb-2">Add Transaction</button>
         </div>
       </form>
       <hr>
       <form id=removeTransactionForm method="post" onsubmit="delete_transaction(); return false;">
-        <div class="form-group">
-          <label for="rowIndex">Row Number</label>
-          <input type="text" class="form-control" id="rowIndex" name="rowInput" placeholder="43">
+        <div class="form-group row">
+          <label for="rowIndex" class="col-sm-5 col-form-label">Row Number</label>
+          <div class="col-sm-7">
+            <input type="text" class="form-control" id="rowIndex" name="rowInput" placeholder="43">
+          </div>
         </div>
         <div class="form-group">
           <button type="submit" class="btn btn-info mb-2">Remove Transaction</button>
         </div>
       </form>
-      <hr>
-
-      <div class="form-group">
-        <label for="stockLookup">Lookup Stock:</label>
-        <input type="text" class="form-control" id="stockLookup" name="stockLookupInput" placeholder="TSLA">
-      </div>
-      <div class="form-group">
-        <a href="" class="btn btn-info mb-2" onclick="lookup_stock(); return false">Plot</a>
-      </div>
-
-    <div class="form-group">
-      <a href="" onclick="generate_overview();return false;" class="btn btn-danger mb-2">Graph!</a>
-    </div>
-
     </div>
     <div class = "col-md-9">
       <div class="row">

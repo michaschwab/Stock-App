@@ -64,6 +64,9 @@ function toggle_position(name) {
                     .style('background-color', 'rgb(255, 243, 212)');
             }
         })
+
+    $('#positionslabel').addClass('active');
+    $('#transactionslabel').removeClass('active');
 }
 
 function generate_overview() {
@@ -189,7 +192,9 @@ function parseCSV(string) {
 //}
 
 function loadGainLossGraph() {
-    $.get('/get-gain-loss-data/', function(responseData){
+    var startDate = document.getElementById("startDateInputID").value;
+    var endDate = document.getElementById("endDateInputID").value;
+    $.get('/get-gain-loss-data/?start='+startDate +'&end=' + endDate, function(responseData){
         var gainLossData = parseCSV(responseData.gainLoss);
         var VTIData = parseCSV(responseData.VTI);
         drawGainLoss(gainLossData,VTIData);
@@ -221,6 +226,8 @@ function drawGainLoss(series1, series2) {
                 type: "line",
                 name: "My Portfolio",
                 color: '#CB654F',
+                markerType: 'circle',
+                markerSize: 5,
                 showInLegend: true,
                 dataPoints: []
             },
@@ -265,7 +272,9 @@ function lookup_stock() {
 
 
 function loadDataAndGraph(stock) {
-    $.get('/get-all-time-series-data/'+stock, function(responseData){
+    var startDate = document.getElementById("startDateInputID").value;
+    var endDate = document.getElementById("endDateInputID").value;
+    $.get('/get-all-time-series-data/'+stock+'?start='+startDate +'&end=' + endDate, function(responseData){
         var data=parseCSV(responseData.priceData);
         var buyData = parseCSV(responseData.buyPoints);
         var sellData = parseCSV(responseData.sellPoints);
@@ -273,6 +282,7 @@ function loadDataAndGraph(stock) {
         var SMA200Data = parseCSV(responseData.SMA200);
         var RMS20Data = parseCSV(responseData.RMS20);
         drawGraph(data,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,stock);
+        document.getElementById("stockLookup").value = stock;
     })
 }
 
@@ -512,4 +522,26 @@ function tabulate(data, columns) {
 	  return table;
 	}
 
-view_transactions()
+function startUp() {
+    view_transactions()
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+    var yyyy = today.getFullYear();
+
+    if (dd < 10) {
+      dd = '0' + dd;
+    }
+
+    if (mm < 10) {
+      mm = '0' + mm;
+    }
+
+    today = yyyy + '-' + mm + '-' + dd ;
+    document.getElementById("endDateInputID").value = today;
+
+    generate_overview();
+}
+
+
+startUp()
