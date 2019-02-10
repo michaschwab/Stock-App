@@ -22,6 +22,13 @@
     stroke-width: 2px;
 }
 
+.Trailing-Stop {
+    fill: none;
+    stroke: #335B8E;
+    stroke-width: 4px;
+    stroke-opacity: .12;
+}
+
 circle.Closing-Price-hover {
     fill: #CB654F;
 }

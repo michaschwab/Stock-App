@@ -42,6 +42,7 @@ def view_transactions():
 @app.route('/get-overview-table/')
 def overview_table():
     dataFrame = makeSummaryDF(stringToday)
+    print(dataFrame)
     nonZeroDF = dataFrame.loc[dataFrame['Quantity'] != 0]
     # columnsDF = nonZeroDF.columns
     # noStockDF = dataFrame[columnsDF[1:]]
@@ -53,6 +54,7 @@ def overview_table():
 def get_all_time_series(stockName):
     startDate = request.args.get('start')
     endDate = request.args.get('end')
+    stopPercent = request.args.get('stop')
 
     dataSeries = lookupPriceFromTable(stockName, startDate, endDate)
     priceData = dataSeries.to_csv(header=True)
@@ -72,8 +74,11 @@ def get_all_time_series(stockName):
     RMS20 = nDayMovingStd(dataSeries, 20)
     csvRMS20 = RMS20.to_csv(header=True)
 
+    stopPercentInt = int(stopPercent)
+    TrailingStop15 = calcTrailingStop(dataSeries, stopPercentInt, startDate)
+    csvTrailingStop = TrailingStop15.to_csv(header=True)
     return Response(json.dumps({'priceData': priceData, 'buyPoints': csvBuy, 'sellPoints': csvSell, 'SMA20': csvSMA20,
-                                'SMA200': csvSMA200, 'RMS20': csvRMS20}),
+                                'SMA200': csvSMA200, 'RMS20': csvRMS20, 'trailingStop': csvTrailingStop}),
                     mimetype='application/json')
 
 

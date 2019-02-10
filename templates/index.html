@@ -31,12 +31,19 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <a href="" class="btn btn-info mb-2" onclick="lookup_stock(); return false">Plot Stock</a>
+      <div class="form-group row">
+        <label for="trailingStopInput" class="col-sm-5 col-form-label">Trailing Stop:</label>
+        <div class="col-sm-7">
+          <input type="text" class="form-control" id="trailingStopInput" name="trailingStopInput" value="15">
+        </div>
       </div>
-      <hr>
-      <div class="form-group">
-        <a href="" onclick="generate_overview();return false;" class="btn btn-danger mb-2">Plot Portfolio</a>
+      <div class="form-group row">
+        <div class="col-sm-6">
+          <a href="" class="btn btn-info mb-2" onclick="lookup_stock(); return false">Plot Stock</a>
+        </div>
+        <div class="col-sm-6">
+          <a href="" onclick="generate_overview();return false;" class="btn btn-danger mb-2">Plot Portfolio</a>
+        </div>
       </div>
       <hr class ="thick">
       <form id=addTransactionForm method="post" onsubmit="add_transaction(); return false;">
@@ -100,6 +107,7 @@
           <form>
             <div class="form-group">
               <center>
+
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                   <label class="btn btn-info active" onclick="view_transactions(); return false;" id="transactionslabel">
                     <input type="radio" name="textbox-radio" id="transactions" autocomplete="off" checked> Transactions
@@ -108,6 +116,7 @@
                     <input type="radio" name="textbox-radio" id="positions" autocomplete="off"> Positions
                   </label>
                 </div>
+
               </center>
 
               <div id="textDisplayArea" style="height: 350px"></div>

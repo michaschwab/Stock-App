@@ -63,7 +63,6 @@ def addNewTransactionNoPrompt(typeInput, dateInput, stockInput, quantInput, pric
     transactionsList.loc[indexNew] = [dateInput, typeInput, stockInput, quantInput, priceInput,
                                       calcCost]
     transactionsList.to_csv('data.csv', sep='\t', index=False)
-    print(transactionsList)
     return indexNew
 
 

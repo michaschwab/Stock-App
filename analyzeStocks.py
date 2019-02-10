@@ -1,6 +1,7 @@
 import fix_yahoo_finance as yf
 import numpy as np
 from datetime import *
+from time import sleep
 from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -11,15 +12,19 @@ pd.set_option('display.max_columns', None)
 
 
 def getStocksList(dataFrame):
-    stockNames = dataFrame['StockSymbol'].unique()
+    stockNames = dataFrame['Stock Symbol'].unique()
     stockNames.sort()
     return stockNames
 
 
 def lookupPriceRange(tickerSymbolList, startDate, endDate):
-    data = yf.download(tickerSymbolList, start=startDate, end=endDate, as_panel=True)
-    print('DATA LOADED')
-    dataClose = data["Close"]  # get only closing value
+    try:
+        data = yf.download(tickerSymbolList, start=startDate, end=endDate, as_panel=True)
+        print('DATA LOADED')
+        dataClose = data["Close"]
+    except:
+        print("Did not succesfully load data")
+
     return dataClose  # in form of dataframe
 
 
@@ -61,10 +66,8 @@ def lookupPriceFromTable(tickerSymbolList, startDate, endDate):
     todayDate = date.today()
     fiveYearsAgo = todayDate - timedelta(days=5*365)
     startDateObj = pd.to_datetime(startDate).date()
-    print(startDateObj)
 
     inDBRange = startDateObj > fiveYearsAgo
-    print(inDBRange)
 
     if condition and inDBRange:
         df1 = globalLookupDF[tickerSymbolList]
@@ -74,7 +77,8 @@ def lookupPriceFromTable(tickerSymbolList, startDate, endDate):
         df1.name = tickerSymbolList
         df = df1
 
-    return df
+    df_nonan = df.dropna()
+    return df_nonan
 
 
 def currentPrices(tickerSymbolList, thisDay):
@@ -94,7 +98,7 @@ def filterTransactions(startDate, endDate):
 
 
 def getAllTransactions(stockName, dataFrame):
-    selectedRows = dataFrame.loc[dataFrame['StockSymbol'] == stockName]
+    selectedRows = dataFrame.loc[dataFrame['Stock Symbol'] == stockName]
     # selectedRows = selectedRows.set_index('Date')
     selectedRows['Date'] = pd.to_datetime(selectedRows['Date'])
     buyRows = selectedRows.loc[selectedRows['Type'] == 'buy']
@@ -102,14 +106,28 @@ def getAllTransactions(stockName, dataFrame):
     return {'sell': sellRows, 'buy': buyRows}
 
 
-def getCurrentQuantities(stocksNameList, dataFrame):
+def getQuantityBought(stocksNameList, dataFrame):
     stockHoldings = []
     for stock in stocksNameList:
         transLines = getAllTransactions(stock, dataFrame)
         buyRows = transLines['buy']
-        sellRows = transLines['sell']
-        totalShares = buyRows['Quantity'].sum() - sellRows['Quantity'].sum()
+        totalShares = buyRows['Quantity'].sum()
         stockHoldings.append(totalShares)
+    return stockHoldings
+
+
+def getQuantitySold(stocksNameList, dataFrame):
+    stockHoldings = []
+    for stock in stocksNameList:
+        transLines = getAllTransactions(stock, dataFrame)
+        sellRows = transLines['sell']
+        totalShares = sellRows['Quantity'].sum()
+        stockHoldings.append(totalShares)
+    return stockHoldings
+
+
+def getCurrentQuantities(stocksNameList, dataFrame):
+    stockHoldings = np.array(getQuantityBought(stocksNameList, dataFrame))-np.array(getQuantitySold(stocksNameList, dataFrame))
     return stockHoldings
 
 
@@ -118,11 +136,21 @@ def getAmountSpent(stocksNameList, dataFrame):
     for stock in stocksNameList:
         transLines = getAllTransactions(stock, dataFrame)
         buyRows = transLines['buy']
-        sellRows = transLines['sell']
-        totalAmount = buyRows['Total Amount'].sum() - sellRows['Total Amount'].sum()
+        totalAmount = buyRows['Total Amount'].sum()
         stockCost.append(totalAmount)
     stockCost = np.array(stockCost)
     return stockCost
+
+
+def getAmountEarned(stocksNameList, dataFrame):
+    stockEarnings = []
+    for stock in stocksNameList:
+        transLines = getAllTransactions(stock, dataFrame)
+        sellRows = transLines['sell']
+        totalAmount = sellRows['Total Amount'].sum()
+        stockEarnings.append(totalAmount)
+    stockEarnings = np.array(stockEarnings)
+    return stockEarnings
 
 
 def getCurrentValue(stocksNameList, stockHoldings, thisDay):
@@ -139,25 +167,34 @@ def makeSummaryDF(thisDay):
     transactions = filterTransactions('2000-01-01', thisDay)
     names = getStocksList(transactions)
     quantities = getCurrentQuantities(names, transactions)
-    spent = np.round(getAmountSpent(names, transactions), 2)
-    currentVal = np.round(getCurrentValue(names, quantities, thisDay), 2)
-    gainLossDollars = np.round(currentVal - spent, 2)
-    gainLossPercent = np.round(gainLossDollars/spent, 2)
+    spentOnly = np.round(getAmountSpent(names, transactions), 2)
+    earnedOnly = np.round(getAmountEarned(names, transactions), 2)
+    boughtQuant = getQuantityBought(names, transactions)
+    soldQuant = getQuantitySold(names, transactions)
+    pricesToday = currentPrices(names, thisDay)
 
-    df = pd.DataFrame(columns=['Stock Symbol', 'Quantity', 'Cost', 'Current Value', 'Gain/Loss Dollars',
-                               'Gain/Loss Percent'],
+    avgBuyPrice = spentOnly/boughtQuant
+
+    currentVal = np.round(getCurrentValue(names, quantities, thisDay), 2)
+    spentOnPosition = avgBuyPrice*quantities
+    gainLossCumulative = np.round(currentVal - spentOnly + earnedOnly, 2)
+    gainLossPercent = np.round((currentVal-spentOnPosition)/spentOnPosition*100,1)
+
+    df = pd.DataFrame(columns=['Stock Symbol', 'Quantity', 'Current Price', 'Current Value', 'Current Gain/Loss %',
+                               'Cumulative Gain/Loss $'],
                       index=currentVal.index.values)
     df['Stock Symbol'] = names
     df['Quantity'] = quantities
-    df['Cost'] = spent
+    # df['Cost'] = np.round(avgBuyPrice*quantities,2)
+    df['Current Price'] = np.round(pricesToday, 2)
     df['Current Value'] = currentVal
-    df['Gain/Loss Dollars'] = gainLossDollars
-    df['Gain/Loss Percent'] = gainLossPercent
+    df['Current Gain/Loss %'] = gainLossPercent
+    df['Cumulative Gain/Loss $'] = gainLossCumulative
     return df
 
 
 def calcTotalGainLoss(df):
-    totalGainLoss = np.round(df['Gain/Loss Dollars'].sum(), 2)
+    totalGainLoss = np.round(df['Cumulative Gain/Loss $'].sum(), 2)
     print(totalGainLoss)
     return totalGainLoss
 
@@ -256,12 +293,54 @@ def nDayMovingAverage(series, n):
     return simpleMovingAvg
 
 
+def calcTrailingStopSegment(series, percent, startDate):
+    startDate = pd.to_datetime(startDate)
+    seriesFiltered = series.loc[series.index > startDate]
+    stopSeries = (1-percent/100)*seriesFiltered
+    stopLine = []
+    maxVal = 0
+    for i, elem in enumerate(stopSeries):
+        if elem >= maxVal:
+            maxVal = elem
+            stopLine.append(maxVal)
+        else:
+            stopLine.append(maxVal)
+        if maxVal >= seriesFiltered[i]:
+            break
+    nElements = len(stopLine)
+    stopLineSeries = pd.Series(data=stopLine, index=stopSeries.index[:nElements], name=stopSeries.name)
+    # stopLineTruncated = stopLineSeries[stopLineSeries <= seriesFiltered]
+    return stopLineSeries
+
+
+def calcTrailingStop(series, percent, startDate):
+    startDateOverall = pd.to_datetime(startDate)
+    endDateOverall = series.tail(1).index[0]
+    stopLineOut = pd.Series(name=series.name)
+    startDate = startDateOverall
+
+    while startDate < endDateOverall:
+        startDateStr = startDate.strftime('%Y-%m-%d')
+        stopLineSegment = calcTrailingStopSegment(series, percent, startDateStr)
+        print(stopLineSegment)
+        stopLineOut = stopLineOut.append(stopLineSegment)
+        startDate = stopLineSegment.tail(1).index[0] + pd.Timedelta(1, unit="d")
+
+    stopLineOut.index.name = 'Date'
+
+    return stopLineOut
+
+
+# dataSeries = lookupPriceFromTable('GE', '2017-01-01', '2018-02-04')
+# calcTrailingStop(dataSeries, 10, '2017-04-01')
+
 # def calcRMS(series, n):
 #     if series.size > n:
 #         RMS = np.std(series.tail(n))
 #     else:
 #         print('Not enough data!')
 #     return RMS
+
 
 def nDayMovingStd(series, n):
     if series.size > n:
@@ -333,7 +412,7 @@ def plotGainLoss(startDate):
     gainLossSeries, VTICompare = generateGainLossOverTime(startDate)
     plt.plot(gainLossSeries, label='My Portfolio')
     plt.plot(VTICompare, label='VTI Index')
-    plt.title('Gain/Loss Sinze ' + startDate)
+    plt.title('Gain/Loss Since ' + startDate)
     plt.xlabel('Date')
     plt.ylabel('Change in Value of Investments (% Mean Investment)')
     plt.legend()

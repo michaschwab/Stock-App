@@ -13,8 +13,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/editTransactions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1122">
-              <caret line="96" column="23" lean-forward="true" selection-start-line="96" selection-start-column="23" selection-end-line="96" selection-end-column="23" />
+            <state relative-caret-position="153">
+              <caret line="26" column="60" selection-start-line="26" selection-start-column="60" selection-end-line="26" selection-end-column="60" />
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
               </folding>
@@ -25,11 +25,13 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="38" column="48" selection-start-line="38" selection-start-column="28" selection-end-line="38" selection-end-column="48" />
+            <state relative-caret-position="210">
+              <caret line="44" column="91" selection-start-line="44" selection-start-column="91" selection-end-line="44" selection-end-column="91" />
               <folding>
                 <element signature="n#div#1;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
                 <element signature="n#div#2;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
+                <element signature="n#div#2;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
+                <element signature="n#div#3;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
                 <element signature="n#form#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
                 <element signature="n#form#1;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
                 <element signature="n#style#0;n#div#0;n#div#0;n#form#0;n#div#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -43,8 +45,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/stock-linechart-styles.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="356">
-              <caret line="72" column="16" selection-start-line="72" selection-start-column="16" selection-end-line="72" selection-end-column="16" />
+            <state relative-caret-position="272">
+              <caret line="28" column="23" selection-start-line="28" selection-start-column="23" selection-end-line="28" selection-end-column="23" />
             </state>
           </provider>
         </entry>
@@ -61,17 +63,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/server.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="54" column="37" selection-start-line="54" selection-start-column="37" selection-end-line="54" selection-end-column="37" />
+            <state relative-caret-position="170">
+              <caret line="43" column="28" lean-forward="true" selection-start-line="43" selection-start-column="28" selection-end-line="43" selection-end-column="28" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/templates/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4572">
-              <caret line="542" column="24" selection-start-line="542" selection-start-column="24" selection-end-line="542" selection-end-column="24" />
+            <state relative-caret-position="209">
+              <caret line="526" column="48" selection-start-line="526" selection-start-column="48" selection-end-line="526" selection-end-column="48" />
             </state>
           </provider>
         </entry>
@@ -79,17 +81,20 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/stock-linechart.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2862">
-              <caret line="202" column="97" selection-start-line="202" selection-start-column="97" selection-end-line="202" selection-end-column="97" />
+            <state relative-caret-position="70">
+              <caret line="162" column="25" lean-forward="true" selection-start-line="162" selection-start-column="25" selection-end-line="162" selection-end-column="25" />
+              <folding>
+                <element signature="e#0#16588#0" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/analyzeStocks.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="129">
-              <caret line="66" column="19" selection-start-line="66" selection-start-column="19" selection-end-line="66" selection-end-column="19" />
+            <state relative-caret-position="145">
+              <caret line="315" column="47" selection-start-line="315" selection-start-column="47" selection-end-line="315" selection-end-column="47" />
               <folding>
                 <element signature="e#0#30#0" expanded="true" />
               </folding>
@@ -101,20 +106,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>selectedRows</find>
-      <find>ax.plo</find>
-      <find>)</find>
-      <find>stockSymbol</find>
-      <find>text</find>
-      <find>fals</find>
-      <find>/get-overview-table/</find>
-      <find>datetime</find>
-      <find>date</find>
-      <find>lookup</find>
-      <find>.loc</find>
-      <find>lookupPriceRang</find>
-      <find>quantity</find>
-      <find>data</find>
       <find>stroke-dasharray: 10px;</find>
       <find>event.cli</find>
       <find>redraw</find>
@@ -127,9 +118,24 @@
       <find>gainLoss</find>
       <find>loadData</find>
       <find>toggle_position</find>
-      <find>showvalue</find>
-      <find>generate</find>
       <find>globalLookup</find>
+      <find>lookupPri</find>
+      <find>generate</find>
+      <find>generate_o</find>
+      <find>makesummaryDF</find>
+      <find>showvalue</find>
+      <find>generate_ov</find>
+      <find>date</find>
+      <find>lookup_</find>
+      <find>animateZoom</find>
+      <find>startup</find>
+      <find>isna</find>
+      <find>tabul</find>
+      <find>tabulate</find>
+      <find>pie</find>
+      <find>click</find>
+      <find>StockSym</find>
+      <find>cursor</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -149,22 +155,23 @@
       <list>
         <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/templates/d3pie.min.js" />
-        <option value="$PROJECT_DIR$/editTransactions.py" />
-        <option value="$PROJECT_DIR$/templates/stock-linechart-styles.css" />
-        <option value="$PROJECT_DIR$/templates/stock-linechart.js" />
         <option value="$PROJECT_DIR$/templates/style.css" />
-        <option value="$PROJECT_DIR$/templates/index.html" />
-        <option value="$PROJECT_DIR$/templates/main.js" />
+        <option value="$PROJECT_DIR$/templates/stock-linechart.js" />
+        <option value="$PROJECT_DIR$/templates/stock-linechart-styles.css" />
         <option value="$PROJECT_DIR$/server.py" />
+        <option value="$PROJECT_DIR$/templates/index.html" />
+        <option value="$PROJECT_DIR$/data.csv" />
         <option value="$PROJECT_DIR$/analyzeStocks.py" />
+        <option value="$PROJECT_DIR$/editTransactions.py" />
+        <option value="$PROJECT_DIR$/templates/main.js" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="160" />
-    <option name="y" value="67" />
+    <option name="x" value="27" />
+    <option name="y" value="111" />
     <option name="width" value="1740" />
-    <option name="height" value="980" />
+    <option name="height" value="979" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -280,8 +287,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.server" />
-        <item itemvalue="Python.editTransactions" />
         <item itemvalue="Python.analyzeStocks" />
+        <item itemvalue="Python.editTransactions" />
       </list>
     </recent_temporary>
   </component>
@@ -299,7 +306,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="128" y="54" width="1392" height="784" extended-state="0" />
+    <frame x="22" y="89" width="1392" height="783" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.121033214" />
@@ -307,8 +314,8 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32668713" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.34202453" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.398017" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.34254992" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39784947" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -360,9 +367,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/data.csv">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="141">
@@ -420,23 +424,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/d3pie.min.js" />
-    <entry file="file://$PROJECT_DIR$/templates/stock-linechart-styles.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="356">
-          <caret line="72" column="16" selection-start-line="72" selection-start-column="16" selection-end-line="72" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/editTransactions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1122">
-          <caret line="96" column="23" lean-forward="true" selection-start-line="96" selection-start-column="23" selection-end-line="96" selection-end-column="23" />
-          <folding>
-            <element signature="e#0#22#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/style.css">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-203">
@@ -444,13 +431,39 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/templates/stock-linechart-styles.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="28" column="23" selection-start-line="28" selection-start-column="23" selection-end-line="28" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/stock-linechart.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="70">
+          <caret line="162" column="25" lean-forward="true" selection-start-line="162" selection-start-column="25" selection-end-line="162" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#16588#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="43" column="28" lean-forward="true" selection-start-line="43" selection-start-column="28" selection-end-line="43" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/templates/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="38" column="48" selection-start-line="38" selection-start-column="28" selection-end-line="38" selection-end-column="48" />
+        <state relative-caret-position="210">
+          <caret line="44" column="91" selection-start-line="44" selection-start-column="91" selection-end-line="44" selection-end-column="91" />
           <folding>
             <element signature="n#div#1;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
             <element signature="n#div#2;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
+            <element signature="n#div#2;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
+            <element signature="n#div#3;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
             <element signature="n#form#0;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
             <element signature="n#form#1;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
             <element signature="n#style#0;n#div#0;n#div#0;n#form#0;n#div#0;n#div#0;n#div#1;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -460,34 +473,37 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/stock-linechart.js">
+    <entry file="file://$PROJECT_DIR$/data.csv">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2862">
-          <caret line="202" column="97" selection-start-line="202" selection-start-column="97" selection-end-line="202" selection-end-column="97" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/main.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4572">
-          <caret line="542" column="24" selection-start-line="542" selection-start-column="24" selection-end-line="542" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/server.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="54" column="37" selection-start-line="54" selection-start-column="37" selection-end-line="54" selection-end-column="37" />
+        <state>
+          <caret column="22" selection-start-column="22" selection-end-column="22" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/analyzeStocks.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="129">
-          <caret line="66" column="19" selection-start-line="66" selection-start-column="19" selection-end-line="66" selection-end-column="19" />
+        <state relative-caret-position="145">
+          <caret line="315" column="47" selection-start-line="315" selection-start-column="47" selection-end-line="315" selection-end-column="47" />
           <folding>
             <element signature="e#0#30#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/editTransactions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="26" column="60" selection-start-line="26" selection-start-column="60" selection-end-line="26" selection-end-column="60" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/main.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="526" column="48" selection-start-line="526" selection-start-column="48" selection-end-line="526" selection-end-column="48" />
         </state>
       </provider>
     </entry>

@@ -8,6 +8,7 @@ var StockLineChart = function(stockName) {
     var me = this;
 
     var plotData = [];
+    var animatedOn = true;
 
     var margin = {top: 20, right: 100, bottom: 40, left: 62},
         width = svg.attr('width') - margin.left - margin.right,
@@ -148,6 +149,7 @@ var StockLineChart = function(stockName) {
         });
 
         function animateZoom(domainBefore, domain) {
+            animatedOn = false;
             new Animation(600, function(t) {
                 var currentDomain = [domainBefore[0] + (domain[0] - domainBefore[0]) * t,
                     domainBefore[1] + (domain[1] - domainBefore[1]) * t];
@@ -158,6 +160,8 @@ var StockLineChart = function(stockName) {
                 /*brush.attr('x', x(currentDomain[0]))
                     .attr('width', x(currentDomain[1]) - x(currentDomain[0]));*/
 
+            }, function() {
+                animatedOn = true;
             }).start();
         }
     }
@@ -319,13 +323,14 @@ var StockLineChart = function(stockName) {
     }
 
     function resetYScale() {
-        var yExtents = plotData.filter(p => p.type === 'line').map(plot => {
+        var yExtents = plotData.filter(p => p.type === 'line' && p.data.filter(d => d.date >= x.domain()[0] && d.date <= x.domain()[1]).length
+            ).map(plot => {
             var dataInX = plot.data.filter(d => d.date >= x.domain()[0] && d.date <= x.domain()[1]);
             return d3.extent(dataInX, function(d) { return d.close; });
-        }).concat(plotData.filter(p => p.type === 'band').map(plot => {
+        }).concat(plotData.filter(p => p.type === 'band' && p.data.filter(d => d.date >= x.domain()[0] && d.date <= x.domain()[1]).length).map(plot => {
             var dataInX = plot.data.filter(d => d.date >= x.domain()[0] && d.date <= x.domain()[1]);
             return d3.extent(dataInX, function(d) { return d.yMin; });
-        })).concat(plotData.filter(p => p.type === 'band').map(plot => {
+        })).concat(plotData.filter(p => p.type === 'band' && p.data.filter(d => d.date >= x.domain()[0] && d.date <= x.domain()[1]).length).map(plot => {
             var dataInX = plot.data.filter(d => d.date >= x.domain()[0] && d.date <= x.domain()[1]);
             return d3.extent(dataInX, function(d) { return d.yMax; });
         }));
@@ -426,15 +431,18 @@ var StockLineChart = function(stockName) {
             }
         }
 
-        linesG.append('rect')
-            .attr('height', height)
-            .attr('width', width)
-            .attr('fill', '#fff')
-            .attr('x', 0)
-            .transition()
-            .duration(1000)
-            .attr('width', 0)
-            .attr('x', width);
+        if(animatedOn) {
+            linesG.append('rect')
+                .attr('height', height)
+                .attr('width', width)
+                .attr('fill', '#fff')
+                .attr('x', 0)
+                .transition()
+                .duration(1000)
+                .attr('width', 0)
+                .attr('x', width);
+        }
+
 
         svg.select('.x-axis')
             .call(d3.axisBottom(x).ticks(6));

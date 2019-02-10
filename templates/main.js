@@ -274,20 +274,23 @@ function lookup_stock() {
 function loadDataAndGraph(stock) {
     var startDate = document.getElementById("startDateInputID").value;
     var endDate = document.getElementById("endDateInputID").value;
-    $.get('/get-all-time-series-data/'+stock+'?start='+startDate +'&end=' + endDate, function(responseData){
+    var trailingStopPercent = document.getElementById("trailingStopInput").value;
+
+    $.get('/get-all-time-series-data/'+stock+'?start='+startDate +'&end=' + endDate +'&stop=' + trailingStopPercent, function(responseData){
         var data=parseCSV(responseData.priceData);
         var buyData = parseCSV(responseData.buyPoints);
         var sellData = parseCSV(responseData.sellPoints);
         var SMA20Data = parseCSV(responseData.SMA20);
         var SMA200Data = parseCSV(responseData.SMA200);
         var RMS20Data = parseCSV(responseData.RMS20);
-        drawGraph(data,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,stock);
+        var trailingStopData = parseCSV(responseData.trailingStop)
+        drawGraph(data,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,trailingStopData,stock);
         document.getElementById("stockLookup").value = stock;
     })
 }
 
 
-function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,stock){
+function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,trailingStopData,stock){
     var divEl = document.getElementById("lineGraph");
     divEl.innerHTML = "";
     var chart = new StockLineChart(stock);
@@ -313,6 +316,11 @@ function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,sto
         d.close = +d[stock];
     });
 
+    trailingStopData.forEach(function(d) {
+        d.date = parseTime(d.Date);
+        d.close = +d[stock];
+    });
+
     buyData.forEach(function(d) {
         d.date = parseTime(d.Date);
         d.close = +d['Price'];
@@ -325,8 +333,6 @@ function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,sto
         d.label = 'Quantity: '+ d['Quantity'] +' | Price: '+ d['Price'];
     });
 
-    console.log(priceData)
-    console.log(buyData)
 
     chart.addBand(SMA20Data.map((d,i) => {
         return {
@@ -356,6 +362,7 @@ function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,sto
 
     chart.addLine(SMA20Data, 'SMA-20');
     chart.addLine(SMA200Data, 'SMA-200');
+    chart.addLine(trailingStopData, 'Trailing-Stop');
 
     chart.addPoints(buyData, 'buy', 'triangle');
     chart.addPoints(sellData, 'sell', 'triangle');
@@ -506,7 +513,19 @@ function tabulate(data, columns) {
 		var rows = tbody.selectAll('tr')
 		  .data(data)
 		  .enter()
-		  .append('tr');
+		  .append('tr')
+		  .on('click', function(d,i){
+		    var stockName = d["Stock Symbol"];
+            loadDataAndGraph(stockName);
+            return false;
+		    })
+		   .on("mouseover", function(d) {
+            d3.select(this).style("cursor", "pointer");
+            d3.select(this).style("color","#ccc");
+            })
+            .on("mouseout", function(d) {
+            d3.select(this).style("color","black");
+            });
 
 		// create a cell in each row for each column
 		var cells = rows.selectAll('td')
