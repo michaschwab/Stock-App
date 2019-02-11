@@ -1,5 +1,5 @@
 .container-fluid {
-  width: 90%;
+  width: 96%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -17,11 +17,17 @@ margin: .8rem;
 font-weight: bold;
 }
 
+#slidersDiv {
+margin-top:.7rem;
+}
+
+
 div #textDisplayArea th, div #textDisplayArea td {
 padding-left: 4px;
 padding-right: 4px;
 font-size: 1rem;
 }
+
 
 div #textDisplayArea {
 overflow: scroll;

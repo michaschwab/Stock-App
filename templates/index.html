@@ -118,8 +118,21 @@
                 </div>
 
               </center>
-
-              <div id="textDisplayArea" style="height: 350px"></div>
+              <div id="textDisplayArea" style="height: 280px"></div>
+              <div width="100%" id="slidersDiv" class="row">
+                <div class="col-sm-4">
+                  Earnings Growth
+                  <input id="slider1" class="slider" type="range" min="-1" max="8" step=".01" value="0" onchange="updateFundamentals()" style= "width:150px"/>
+                </div>
+                <div class="col-sm-4">
+                  Dividend Growth
+                  <input id="slider2" class="slider" type="range" min="-.5" max="1" step=".01" value="0" onchange="updateFundamentals()" style= "width:150px"/>
+                </div>
+                <div class="col-sm-4">
+                  Book Val
+                  <input id="slider3" class="slider" type="range" min="0" max="10" step=".01" value="0" onchange="updateFundamentals()" style= "width:150px"/>
+                </div>
+              </div>
             </div>
           </form>
         </div>
@@ -130,10 +143,14 @@
           </div>
         </div>
       </div>
-      <div class = "row">
-        <div class = "col-md-12">
-          <div id="lineGraph" style="height: 335px; width: 100%;"></div>
+      <div class = "row" id="graphAreaWrapper" style="position:relative">
+        <div class = "col-md-5">
+          <div id="fundamentalsGraph" style="height: 350px; width: 100%;"></div>
         </div>
+        <div class = "col-md-7">
+          <div id="lineGraph" style="height: 350px; width: 100%;"></div>
+        </div>
+        <div id="largeGraphArea" style="position: absolute;top:0; left:0;width:100%;height:100%"></div>
       </div>
     </div>
   </div>

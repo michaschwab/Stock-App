@@ -1,6 +1,6 @@
 
-var StockLineChart = function(stockName) {
-    var divEl = document.getElementById("lineGraph");
+var StockLineChart = function(stockName, divID) {
+    var divEl = document.getElementById(divID);
     var divW = divEl.offsetWidth, divH = divEl.offsetHeight;
     var svg = d3.select(divEl).append('svg')
         .attr("width", divW)
@@ -10,7 +10,7 @@ var StockLineChart = function(stockName) {
     var plotData = [];
     var animatedOn = true;
 
-    var margin = {top: 20, right: 100, bottom: 40, left: 62},
+    var margin = {top: 20, right: 20, bottom: 40, left: 62},
         width = svg.attr('width') - margin.left - margin.right,
         height = svg.attr('height') - margin.top - margin.bottom;
 
@@ -117,6 +117,7 @@ var StockLineChart = function(stockName) {
 
         svg.on('mousedown', function() {
             brushStart = d3.event.offsetX - margin.left;
+            d3.event.preventDefault();
         });
         svg.on('mousemove.brush', function() {
             if(brushStart !== -1) {
@@ -125,6 +126,7 @@ var StockLineChart = function(stockName) {
                 var brushRight = brushStart < brushEnd ? brushEnd : brushStart;
                 brush.attr('x', brushLeft)
                     .attr('width', brushRight - brushLeft);
+                d3.event.preventDefault();
             }
         });
         svg.on('mouseup', function() {
@@ -139,6 +141,7 @@ var StockLineChart = function(stockName) {
                 brush.attr('width', 0);
 
                 animateZoom(domainBefore, domain);
+                d3.event.preventDefault();
             }
             brushStart = -1;
         });
@@ -146,6 +149,7 @@ var StockLineChart = function(stockName) {
             var domainBefore = x.domain().map(d => d.getTime());
             var domain = getMaxXdomain();
             animateZoom(domainBefore, domain);
+            d3.event.preventDefault();
         });
 
         function animateZoom(domainBefore, domain) {
@@ -201,14 +205,15 @@ var StockLineChart = function(stockName) {
                                 .attr('cy', y(currentY));
                         }
                         if(plot.hover.showValue) {
+                            var textValue = plot.hover.showValue(currentX, Math.round(currentY*100)/100);
                             plot.hover.showValueNode
-                                .attr('x', x(currentX) + 15)
+                                .attr('x', x(currentX) > width * 3/4 ? x(currentX) - textValue.length * 10  : x(currentX) + 15)
                                 .attr('y', y(currentY) + 5)
-                                .text(plot.hover.showValue(currentX, Math.round(currentY*100)/100));
+                                .text(textValue);
                             plot.hover.markNode.select('rect')
-                                .attr('x', x(currentX) + 10)
+                                .attr('x', x(currentX) > width * 3/4 ? x(currentX) - textValue.length * 10 - 10 : x(currentX) + 10)
                                 .attr('y', y(currentY) - 15)
-                                .attr('width', plot.hover.showValue(currentX, Math.round(currentY)).length * 10);
+                                .attr('width', textValue.length * 10);
                         }
                     } else if(plot.type === 'band') {
                         var currentYs = [closestTwo[0].yMin * distanceRatio + closestTwo[1].yMin * (1 - distanceRatio),
@@ -420,7 +425,7 @@ var StockLineChart = function(stockName) {
                     .attr('y', -15)
                     .attr('rx', 10)
                     .attr('ry', 10)
-                    .attr('x', d => x(d.date) < width * 3/4 ? 20 : -d.label.length * 8)
+                    .attr('x', d => x(d.date) < width * 3/4 ? 20 : -d.label.length * 8 - 10)
                     .attr('height', 30)
                     .attr('width', d => d.label.length * 8);
 

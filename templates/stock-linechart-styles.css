@@ -1,4 +1,4 @@
-.tick, .lines {
+svg > * {
     user-select: none;
 }
 
@@ -21,6 +21,31 @@
     stroke: #CB654F;
     stroke-width: 2px;
 }
+
+.Earnings {
+    fill: none;
+    stroke: #CB654F;
+    stroke-width: 2px;
+}
+
+.Book-Val {
+    fill: none;
+    stroke: #8CBEA3;
+    stroke-width: 2px;
+}
+
+.Dividend {
+    fill: none;
+    stroke: #335B8E;
+    stroke-width: 2px;
+}
+
+.Revenue {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
+}
+
 
 .Trailing-Stop {
     fill: none;

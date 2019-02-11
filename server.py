@@ -2,6 +2,7 @@ from flask import Flask, render_template, send_from_directory, request, Response
 from editTransactions import *
 from analyzeStocks import *
 import json
+from fundamentals import *
 
 app = Flask(__name__)
 stringToday = str(date.today())
@@ -48,6 +49,22 @@ def overview_table():
     # noStockDF = dataFrame[columnsDF[1:]]
     csvData = nonZeroDF.to_csv(index=False)
     return csvData
+
+
+@app.route('/get-all-fundamentals-data/<stockName>')
+def get_all_fundamentals(stockName):
+    alpha = float(request.args.get('alpha'))
+    beta = float(request.args.get('beta'))
+    gamma = float(request.args.get('gamma'))
+
+    dataFrame = downloadOne(stockName)
+    csvData = dataFrame.to_csv(header=True)
+    dataFrameTrends = drawFutureTrend(dataFrame, alpha, beta, gamma)
+    csvTrends = dataFrameTrends.to_csv(header=True)
+
+    return Response(json.dumps({'data': csvData,
+                                'trends': csvTrends}),
+                    mimetype='application/json')
 
 
 @app.route('/get-all-time-series-data/<stockName>')

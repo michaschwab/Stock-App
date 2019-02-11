@@ -1,11 +1,12 @@
 import fix_yahoo_finance as yf
 import numpy as np
 from datetime import *
-from time import sleep
 from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import matplotlib.dates as mdates
+import time
+
 
 pd.options.mode.chained_assignment = None
 pd.set_option('display.max_columns', None)
@@ -18,12 +19,17 @@ def getStocksList(dataFrame):
 
 
 def lookupPriceRange(tickerSymbolList, startDate, endDate):
-    try:
-        data = yf.download(tickerSymbolList, start=startDate, end=endDate, as_panel=True)
-        print('DATA LOADED')
-        dataClose = data["Close"]
-    except:
-        print("Did not succesfully load data")
+    attempts = 0
+    while attempts < 3:
+        try:
+            data = yf.download(tickerSymbolList, start=startDate, end=endDate, as_panel=True)
+            dataClose = data["Close"]
+            print('DATA LOADED')
+            break
+        except ValueError:
+            print("Did not succesfully load data")
+            attempts += 1
+            time.sleep(1)
 
     return dataClose  # in form of dataframe
 
@@ -322,7 +328,6 @@ def calcTrailingStop(series, percent, startDate):
     while startDate < endDateOverall:
         startDateStr = startDate.strftime('%Y-%m-%d')
         stopLineSegment = calcTrailingStopSegment(series, percent, startDateStr)
-        print(stopLineSegment)
         stopLineOut = stopLineOut.append(stopLineSegment)
         startDate = stopLineSegment.tail(1).index[0] + pd.Timedelta(1, unit="d")
 

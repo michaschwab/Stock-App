@@ -53,9 +53,7 @@ function toggle_position(name) {
                 var thisRow = $("td").filter(function() {
                     return $(this).text() == name;
                 }).closest("tr");
-                console.log(thisRow)
                 var allTD = thisRow.find('td');
-                console.log(allTD)
                 var firstTD = allTD[0];
                 firstTD.scrollIntoView({block: "end", behavior: "smooth"});
                 d3.select(thisRow[0]).style('background-color','white')
@@ -82,8 +80,8 @@ function generate_overview() {
 
         var color = d3.scaleOrdinal(d3.schemeSet3);
         var width=350;
-        var height=370;
-        var r = 120;
+        var height=360;
+        var r = 115;
         var tran = width/2, tran_y = height/2+40;
 
         var pie = d3.pie()
@@ -176,20 +174,7 @@ function parseCSV(string) {
     }
     return parsedCSV
 }
-//
-//function parseCSV2(string) {
-//    var rows = string.split('\n');
-//    var header = rows.splice(0).split(',');
-//
-//    return rows.map(function(row) {
-//        var thisRow = row.split(',');
-//        var rowObj = {};
-//        for(var j =0; j < thisRow.length; j++){
-//            rowObj[headers[j]] = thisRow[j];
-//        }
-//        return rowObj;
-//    });
-//}
+
 
 function loadGainLossGraph() {
     var startDate = document.getElementById("startDateInputID").value;
@@ -204,64 +189,65 @@ function loadGainLossGraph() {
 
 function drawGainLoss(series1, series2) {
     //first get the data
-        var chart = new CanvasJS.Chart("lineGraph", {
-            theme: "light2", // "light1", "light2", "dark1", "dark2"
-            animationEnabled: true,
-            zoomEnabled: true,
-            title: {
-                text: "Active Portfolio Gain/Loss vs Market Index"
-            },
-            axisX: {
-                valueFormatString: "YYYY-MM-DD"
-            },
-            axisY: {
-                title: "Relative Gain/Loss (%)",
-                includeZero: false
-            },
-            toolTip: {
-                shared: true
-            },
-            data: [
-            {
-                type: "line",
-                name: "My Portfolio",
-                color: '#CB654F',
-                markerType: 'circle',
-                markerSize: 5,
-                showInLegend: true,
-                dataPoints: []
-            },
-            {
-                type: "line",
-                name: "Market Index",
-                color: '#8CBEA3',
-                showInLegend: true,
-                dataPoints: []
-            }]
-        });
+    var graphAreaElement = document.getElementById("largeGraphArea");
+    graphAreaElement.style.display = 'block';
+    var chart = new CanvasJS.Chart("largeGraphArea", {
+        theme: "light2", // "light1", "light2", "dark1", "dark2"
+        animationEnabled: true,
+        zoomEnabled: true,
+        title: {
+            text: "Active Portfolio Gain/Loss vs Market Index"
+        },
+        axisX: {
+            valueFormatString: "YYYY-MM-DD"
+        },
+        axisY: {
+            title: "Relative Gain/Loss (%)",
+            includeZero: false
+        },
+        toolTip: {
+            shared: true
+        },
+        data: [
+        {
+            type: "line",
+            name: "My Portfolio",
+            color: '#CB654F',
+            markerType: 'circle',
+            markerSize: 5,
+            showInLegend: true,
+            dataPoints: []
+        },
+        {
+            type: "line",
+            name: "Market Index",
+            color: '#8CBEA3',
+            showInLegend: true,
+            dataPoints: []
+        }]
+    });
 
-        addDataPoints(series1,0,'Gain/Loss',"");
-        addDataPoints(series2,1,'VTI',"")
-        console.log(chart)
+    addDataPoints(series1,0,'Gain/Loss',"");
+    addDataPoints(series2,1,'VTI',"")
 
-        chart.render();
+    chart.render();
 
-        function addDataPoints(dataInput,lineID,yKey,labelKey) {
-            var noOfDps = dataInput.length;
-            for(var i = 0; i < noOfDps; i++) {
-                var parts =dataInput[i].Date.split('-');
-                // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
-                // January - 0, February - 1, etc.
-                var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
-                xVal = mydate
-                yVal = Number(dataInput[i][yKey])
-                if (labelKey ==""){
-                labelVal = ""} else {
-                labelVal = dataInput[i][labelKey]
-                };
-                chart.options.data[lineID].dataPoints.push({x: xVal, y: yVal, label: labelVal});
-            }
+    function addDataPoints(dataInput,lineID,yKey,labelKey) {
+        var noOfDps = dataInput.length;
+        for(var i = 0; i < noOfDps; i++) {
+            var parts =dataInput[i].Date.split('-');
+            // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
+            // January - 0, February - 1, etc.
+            var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
+            xVal = mydate
+            yVal = Number(dataInput[i][yKey])
+            if (labelKey ==""){
+            labelVal = ""} else {
+            labelVal = dataInput[i][labelKey]
+            };
+            chart.options.data[lineID].dataPoints.push({x: xVal, y: yVal, label: labelVal});
         }
+    }
 }
 
 
@@ -286,14 +272,31 @@ function loadDataAndGraph(stock) {
         var trailingStopData = parseCSV(responseData.trailingStop)
         drawGraph(data,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,trailingStopData,stock);
         document.getElementById("stockLookup").value = stock;
-    })
+   })
+
+
+    var alpha = document.getElementById("slider1").value;
+    var beta = document.getElementById("slider2").value;
+    var gamma = document.getElementById("slider3").value;
+   loadFundamentalsData(stock,alpha,beta,gamma);
+}
+
+function loadFundamentalsData(stock,alpha,beta,gamma){
+   $.get('/get-all-fundamentals-data/'+stock+'?alpha='+alpha+'&beta='+beta+'&gamma='+gamma, function(responseData){
+        var data=parseCSV(responseData.data);
+        var trends=parseCSV(responseData.trends);
+        drawFundamentals(data,trends,stock);
+   })
 }
 
 
 function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,trailingStopData,stock){
     var divEl = document.getElementById("lineGraph");
     divEl.innerHTML = "";
-    var chart = new StockLineChart(stock);
+    var graphAreaElement = document.getElementById("largeGraphArea");
+    graphAreaElement.innerHTML = "";
+    graphAreaElement.style.display = 'none';
+    var chart = new StockLineChart(stock,"lineGraph");
     var parseTime = d3.timeParse("%Y-%m-%d");
 
     priceData.forEach(function(d) {
@@ -368,129 +371,227 @@ function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,tra
     chart.addPoints(sellData, 'sell', 'triangle');
 }
 
+
+
+
+function drawFundamentals(data,trends,stock) {
+
+    var graphAreaElement = document.getElementById("largeGraphArea");
+    graphAreaElement.innerHTML = "";
+    graphAreaElement.style.display = 'none';
+
+    bookVals = data.map(function(d){
+                        return +d['Book Value Per Share']});
+    earningVals = data.map(function(d){
+                        return +d['Earnings Per Share']});
+    divVals = data.map(function(d){
+                        return +d['Dividends USD']});
+
+    var maxY = Math.max(...bookVals)+Math.max(...bookVals)*0.5;
+    var minYEarn = Math.min(...earningVals);
+    var minYDiv = Math.min(...divVals);
+    var minY = Math.min(minYEarn,minYDiv)-1;
+
+
+    var chart = new CanvasJS.Chart("fundamentalsGraph", {
+        theme: "light2", // "light1", "light2", "dark1", "dark2"
+        animationEnabled: false,
+        zoomEnabled: true,
+        title: {
+            text: "Financials ("+stock +")"
+        },
+        axisX: {
+            valueFormatString: "YYYY-MM"
+        },
+        axisY: {
+            title: "$ Per Share",
+            includeZero: false,
+            minimum: minY,
+            maximum: maxY
+        },
+        toolTip: {
+            shared: true
+        },
+        data: [
+        {
+            type: "line",
+            name: "Earnings",
+            color: '#CB654F',
+            markerType: 'circle',
+            markerSize: 5,
+            showInLegend: true,
+            dataPoints: []
+        },
+        {
+            type: "line",
+            name: "Book",
+            color: '#8CBEA3',
+            markerType: 'circle',
+            markerSize: 5,
+            showInLegend: true,
+            dataPoints: []
+        },
+        {
+            type: "line",
+            name: "Dividend",
+            color: '#335B8E',
+            markerType: 'circle',
+            markerSize: 5,
+            showInLegend: true,
+            dataPoints: []
+        },
+        {
+            type: "line",
+            name: "Earnings-Trend",
+            color: '#CB654F',
+            lineThickness: 1,
+            lineDashType: "dash",
+            markerType: "none",
+            markerSize: 1,
+            toolTipContent: null,
+            showInLegend: false,
+            dataPoints: []
+        },
+        {
+            type: "line",
+            name: "Dividends-Trend",
+            color: '#335B8E',
+            lineThickness: 1,
+            lineDashType: "dash",
+            markerType: "none",
+            markerSize: 1,
+            toolTipContent: null,
+            showInLegend: false,
+
+            dataPoints: []
+        },
+        {
+            type: "line",
+            name: "Book-Trend",
+            color: '#8CBEA3',
+            lineThickness: 1,
+            lineDashType: "dash",
+            markerType: "none",
+            markerSize: 1,
+            showInLegend: false,
+            dataPoints: []
+        }
+        ]
+    });
+
+    addDataPoints(data,0,'Earnings Per Share',"");
+    addDataPoints(data,1,'Book Value Per Share',"");
+    addDataPoints(data,2,'Dividends USD',"")
+    addDataPoints(trends,3,'Earnings(t)',"")
+    addDataPoints(trends,4,'Dividends(t)',"")
+    addDataPoints(trends,5,'Book(t)',"")
+
+    chart.render();
+    console.log(data)
+    function addDataPoints(dataInput,lineID,yKey,labelKey) {
+        var noOfDps = dataInput.length;
+        for(var i = 0; i < noOfDps; i++) {
+            var parts =dataInput[i].Date.split('-');
+            // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
+            // January - 0, February - 1, etc.
+            var mydate = new Date(parts[0], parts[1] - 1);
+            xVal = mydate
+            yVal = Number(dataInput[i][yKey])
+            if (labelKey ==""){
+            labelVal = ""} else {
+            labelVal = dataInput[i][labelKey]
+            };
+            chart.options.data[lineID].dataPoints.push({x: xVal, y: yVal, label: labelVal});
+        }
+    }
+}
 //
-//function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,stock) {
-//    //first get the data
-//        var chart = new CanvasJS.Chart("lineGraph", {
-//            theme: "light2", // "light1", "light2", "dark1", "dark2"
-//            animationEnabled: true,
-//            zoomEnabled: true,
-//            title: {
-//                text: stock
-//            },
-//            axisX: {
-//                valueFormatString: "YYYY-MM-DD"
-//            },
-//            axisY: {
-//                title: "Closing price ($)",
-//                includeZero: false
-//            },
-//            toolTip: {
-//                shared: false
-//            },
-//            data: [
-//            {
-//                type: "rangeArea",
-//                name: "2-Sigma Volatility",
-//                fillOpacity: .8,
-//                lineThickness: 0,
-//                color: '#D6DEE8',
-//                dataPoints: []
-//            },
-//            {
-//                type: "line",
-//                name: "Price",
-//                color: '#335B8E',
-//                dataPoints: []
-//            },
-//            {   type: "scatter",
-//                name: "Buy Points",
-//                markerType: "triangle",
-//                markerColor: "#8CBEA3",
-//                markerSize: 15,
-//                indexLabelFormatter: formatter,
-//                indexLabelFontWeight: "bold",
-//                indexLabelFontSize: 15,
-//                toolTipContent: "Buy {label} at ${y}",
-//                dataPoints: []
-//            },
-//            {   type: "scatter",
-//                name: "Sell Points",
-//                markerType: "cross",
-//                markerColor: "#CB654F",
-//                markerSize: 12,
-//                indexLabelFormatter: formatter,
-//                indexLabelFontWeight: "bold",
-//                indexLabelFontSize: 15,
-//                toolTipContent: "Sell {label} at ${y}",
-//                dataPoints: []
-//            },
-//            {
-//                type: "line",
-//                name: "SMA 20",
-//                lineDashType: "dot",
-//                lineThickness: 1,
-//                toolTipContent: null,
-//                color: '##335B8E',
-//                dataPoints: []
-//            },
-//            {
-//                type: "line",
-//                name: "SMA 200",
-//                lineDashType: "dot",
-//                lineThickness: 2,
-//                toolTipContent: null,
-//                color: '#B66E56',
-//                dataPoints: []
-//            }]
-//        });
+//function drawGraphFundamentals(data,stock){
 //
-//        addRangePoints(SMA20Data,RMS20Data,0,stock)
-//        addDataPoints(priceData,1,stock,"");
-//        addDataPoints(buyData,2,'Price','Quantity')
-//        addDataPoints(sellData,3,'Price','Quantity')
-//        addDataPoints(SMA20Data,4,stock,'')
-//        addDataPoints(SMA200Data,5,stock,'')
-//
-//        console.log(chart)
-//
-//        chart.render();
-//
-//        function addDataPoints(dataInput,lineID,yKey,labelKey) {
-//            var noOfDps = dataInput.length;
-//            for(var i = 0; i < noOfDps; i++) {
-//                var parts =dataInput[i].Date.split('-');
-//                // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
-//                // January - 0, February - 1, etc.
-//                var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
-//                xVal = mydate
-//                yVal = Number(dataInput[i][yKey])
-//                if (labelKey ==""){
-//                labelVal = ""} else {
-//                labelVal = dataInput[i][labelKey]
-//                };
-//                chart.options.data[lineID].dataPoints.push({x: xVal, y: yVal, label: labelVal});
-//            }
+//    var divEl = document.getElementById("fundamentalsGraph");
+//    divEl.innerHTML = "";
+//    var chart = new StockLineChart(stock, "fundamentalsGraph");
+//    var parseTime = d3.timeParse("%Y-%m");
+//    var bookUSD = data.map(function(obj) {
+//        return {
+//            date: parseTime(obj.Date),
+//            close: obj['Book Value Per Share']
 //        }
+//    })
 //
-//        function addRangePoints(meanInput,stdInput,lineID,yKey) {
-//            var noOfDps = meanInput.length;
-//            for(var i = 0; i < noOfDps; i++) {
-//                var parts =meanInput[i].Date.split('-');
-//                // Please pay attention to the month (parts[1]); JavaScript counts months from 0:
-//                // January - 0, February - 1, etc.
-//                var mydate = new Date(parts[0], parts[1] - 1, parts[2]);
-//                xVal = mydate
-//                yValHigh = Number(meanInput[i][yKey])+2*Number(stdInput[i][yKey])
-//                yValLow = Number(meanInput[i][yKey])-2*Number(stdInput[i][yKey])
-//                chart.options.data[lineID].dataPoints.push({x: xVal, y: [yValLow, yValHigh]});
-//            }
+//    var earningsUSD = data.map(function(obj) {
+//        return {
+//            date: parseTime(obj.Date),
+//            close: obj['Earnings Per Share']
 //        }
+//    })
 //
-//        function formatter(e){
-//            var quant = Number(e.dataPoint.label);
-//            return quant.toFixed(0)
+//    var revenuePerShare = data.map(function(obj) {
+//        var shares = +obj['Shares (Mil)'];
+//        var revenue = +obj['Revenue (Mil)'];
+//        var revPerShare = revenue/shares;
+//        return {
+//            date: parseTime(obj.Date),
+//            close: revPerShare
 //        }
+//    })
+//
+//    var dividendUSD = data.map(function(obj) {
+//        return {
+//            date: parseTime(obj.Date),
+//            close: obj['Dividends USD']
+//        }
+//    })
+//
+////    var bookUSD = data, earningsUSD= data, revenuePerShare= data, dividendUSD=data
+//
+//
+//
+//    console.log(bookUSD)
+//
+//
+//    chart.addLine(earningsUSD, 'Earnings', {
+//        mark: 'circle',
+//        markSize: 5,
+//        showValue: function(date, value) {
+//            return monthNames[date.getMonth()].substr(0,3) + ', ' +date.getFullYear() +': $' + value;
+//        }
+//    });
+//
+//
+//    chart.addLine(bookUSD, 'Book-Val', {
+//        mark: 'circle',
+//        markSize: 5,
+//        showValue: function(date, value) {
+//            return monthNames[date.getMonth()].substr(0,3) + ', ' +date.getFullYear() +': $' + value;
+//        }
+//    });
+//
+//
+//    chart.addLine(dividendUSD, 'Dividend', {
+//        mark: 'circle',
+//        markSize: 5,
+//        showValue: function(date, value) {
+//            return monthNames[date.getMonth()].substr(0,3) + ', ' +date.getFullYear() +': $' + value;
+//        }
+//    });
+//
+//
+//    chart.addLine(revenuePerShare, 'Revenue', {
+//        mark: 'circle',
+//        markSize: 5,
+//        showValue: function(date, value) {
+//            return monthNames[date.getMonth()].substr(0,3) + ', ' +date.getFullYear() +': $' + value;
+//        }
+//    });
+//
+//    var monthNames = [
+//        "January", "February", "March",
+//        "April", "May", "June", "July",
+//        "August", "September", "October",
+//        "November", "December"
+//    ];
+//
 //}
 
 
@@ -560,6 +661,15 @@ function startUp() {
     document.getElementById("endDateInputID").value = today;
 
     generate_overview();
+}
+
+function updateFundamentals() {
+    var stock = document.getElementById("stockLookup").value;
+    var alpha = document.getElementById("slider1").value;
+    var beta = document.getElementById("slider2").value;
+    var gamma = document.getElementById("slider3").value;
+
+    loadFundamentalsData(stock,alpha,beta,gamma)
 }
 
 
