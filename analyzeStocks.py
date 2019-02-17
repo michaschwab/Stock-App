@@ -5,11 +5,17 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import matplotlib.dates as mdates
-import time
 
 
 pd.options.mode.chained_assignment = None
 pd.set_option('display.max_columns', None)
+
+
+def reloadData():
+    global transactionsList
+    global globalLookupDF
+
+    transactionsList, globalLookupDF = startUp()
 
 
 def getStocksList(dataFrame):
@@ -19,17 +25,13 @@ def getStocksList(dataFrame):
 
 
 def lookupPriceRange(tickerSymbolList, startDate, endDate):
-    attempts = 0
-    while attempts < 3:
-        try:
-            data = yf.download(tickerSymbolList, start=startDate, end=endDate, as_panel=True)
-            dataClose = data["Close"]
-            print('DATA LOADED')
-            break
-        except ValueError:
-            print("Did not succesfully load data")
-            attempts += 1
-            time.sleep(1)
+    try:
+        data = yf.download(tickerSymbolList, start=startDate, end=endDate, as_panel=True)
+        dataClose = data["Close"]
+        print('DATA LOADED')
+    except ValueError:
+        print("Did not succesfully load data")
+        dataClose = []
 
     return dataClose  # in form of dataframe
 
@@ -296,6 +298,7 @@ def nDayMovingAverage(series, n):
         simpleMovingAvg = simpleMovingAvg[~np.isnan(simpleMovingAvg)]
     else:
         print('Series too short!')
+        simpleMovingAvg = series
     return simpleMovingAvg
 
 

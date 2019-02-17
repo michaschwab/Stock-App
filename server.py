@@ -21,6 +21,7 @@ def add_transaction():
     quantityInput = request.form['quantityInput']
     priceInput = request.form['priceInput']
     newIndex = addNewTransactionNoPrompt(buySellFlag, dateInput, stockInput, quantityInput, priceInput)
+    reloadData()
     return str(newIndex)
 
 
@@ -28,7 +29,6 @@ def add_transaction():
 def delete_transaction():
     rowIndex = request.form['rowInput']
     rowIndexInt = int(rowIndex)
-    print(type(rowIndexInt))
     deleteTransaction(rowIndexInt)
     return str(rowIndex)
 
@@ -43,7 +43,6 @@ def view_transactions():
 @app.route('/get-overview-table/')
 def overview_table():
     dataFrame = makeSummaryDF(stringToday)
-    print(dataFrame)
     nonZeroDF = dataFrame.loc[dataFrame['Quantity'] != 0]
     # columnsDF = nonZeroDF.columns
     # noStockDF = dataFrame[columnsDF[1:]]
