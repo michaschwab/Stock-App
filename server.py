@@ -30,6 +30,7 @@ def delete_transaction():
     rowIndex = request.form['rowInput']
     rowIndexInt = int(rowIndex)
     deleteTransaction(rowIndexInt)
+    reloadData()
     return str(rowIndex)
 
 
