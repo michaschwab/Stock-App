@@ -11,11 +11,14 @@ pd.options.mode.chained_assignment = None
 pd.set_option('display.max_columns', None)
 
 
-def reloadData():
+def reloadTransactions():
     global transactionsList
-    global globalLookupDF
-
-    transactionsList, globalLookupDF = startUp()
+    transactionsFileName = 'data.csv'
+    fileInPath = Path(transactionsFileName)
+    if fileInPath.exists():
+        transactionsList = pd.read_csv('data.csv', sep='\t')
+    else:
+        print("Nothing here!")
 
 
 def getStocksList(dataFrame):
@@ -32,7 +35,6 @@ def lookupPriceRange(tickerSymbolList, startDate, endDate):
     except ValueError:
         print("Did not succesfully load data")
         dataClose = []
-
     return dataClose  # in form of dataframe
 
 
@@ -61,8 +63,6 @@ transactionsList, globalLookupDF = startUp()
 def lookupPriceFromTable(tickerSymbolList, startDate, endDate):
     startDate = pd.to_datetime(startDate)
     endDate = pd.to_datetime(endDate)
-    # df1 = globalLookupDF[tickerSymbolList]
-    # df = df1[(df1.index >= startDate) & (df1.index <= endDate)]
     # if stock is in the database look it up in database otherwise look it up online
     dfKeys = globalLookupDF.keys().tolist()
 

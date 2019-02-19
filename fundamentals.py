@@ -83,5 +83,5 @@ def drawFutureTrend(dataFrame, alpha, beta, gamma):
     print(dataFrameOut)
     return dataFrameOut
 
-df = downloadOne('GOOG')
-drawFutureTrend(df, 1, 0, 0)
+# df = downloadOne('GOOG')
+# drawFutureTrend(df, 1, 0, 0)

@@ -21,7 +21,7 @@ def add_transaction():
     quantityInput = request.form['quantityInput']
     priceInput = request.form['priceInput']
     newIndex = addNewTransactionNoPrompt(buySellFlag, dateInput, stockInput, quantityInput, priceInput)
-    reloadData()
+    reloadTransactions()
     return str(newIndex)
 
 
@@ -30,7 +30,7 @@ def delete_transaction():
     rowIndex = request.form['rowInput']
     rowIndexInt = int(rowIndex)
     deleteTransaction(rowIndexInt)
-    reloadData()
+    reloadTransactions()
     return str(rowIndex)
 
 
