@@ -1,9 +1,7 @@
 import numpy as np
 from datetime import *
 from pathlib import Path
-import matplotlib.pyplot as plt
 import pandas as pd
-import matplotlib.dates as mdates
 import importlib
 
 pd.options.mode.chained_assignment = None
@@ -294,88 +292,62 @@ def calcTotalGainLoss(df):
     return totalGainLoss
 
 
-def plotTotalHoldings(summaryDF):
-    # Data to plot
-    nonZeroDF = summaryDF.loc[summaryDF['Quantity'] != 0]
-
-    labels = nonZeroDF['Stock Symbol']
-    sizes = nonZeroDF['Current Value']
-    # explode = (0.1, 0, 0, 0)  # explode 1st slice
-    # Plot
-    plt.pie(sizes, labels=labels,
-            autopct='%1.1f%%', shadow=False, startangle=140)
-    plt.axis('equal')
-    titleString = 'Total = ' + str(round(sum(sizes), 2))
-    plt.title(titleString)
-    plt.show()
-
-    # def onpick(event):
-    #     thisline = event.artist
-    #     xdata = thisline.get_xdata()
-    #     ydata = thisline.get_ydata()
-    #     ind = event.ind
-    #     points = tuple(zip(xdata[ind], ydata[ind]))
-    #     print('onpick points:', points)
-    #
-    # plt.canvas.mpl_connect('pick_event', onpick)
-
-
 def getBuySellPoints(stock, typeBS, df):
     transLines = getAllTransactions(stock, df)
     buySellRows = transLines[typeBS]
     return buySellRows
 
-
-def analyzePeriod(stock, startDate, endDate):
-    dataFrame = lookupPriceFromTable(stock, startDate, endDate)
-    filteredDF = filterTransactions(startDate, endDate)
-
-    buyPoints = getBuySellPoints(stock, 'buy', filteredDF)
-    sellPoints = getBuySellPoints(stock, 'sell', filteredDF)
-
-    # Moving averages (10, 50, 200)
-    SMA20 = nDayMovingAverage(dataFrame, 20)
-    SMA50 = nDayMovingAverage(dataFrame, 50)
-    SMA200 = nDayMovingAverage(dataFrame, 200)
-
-    # 50-day RMS
-
-    RMS20 = nDayMovingStd(dataFrame, 20)
-
-    # fig, ax = plt.subplots()
-    ax = plt
-    ax.plot(dataFrame)
-    ax.fill_between(dataFrame.index, SMA20 - 2 * RMS20, SMA20 + 2 * RMS20,
-                    alpha=0.2, facecolor='#089FFF', antialiased=True, label='20-day moving RMS')
-
-    if dataFrame.size > 20:
-        ax.plot(SMA20, '--', linewidth=1, label='20-day SMA')
-    if dataFrame.size > 50:
-        ax.plot(SMA50, '--', linewidth=1, label='50-day SMA')
-    if dataFrame.size > 200:
-        ax.plot(SMA200, '--', linewidth=1, label='200-day SMA')
-
-    ax.legend()
-
-    plot1 = ax.plot(sellPoints['Date'], sellPoints['Price'], 'rv')
-    plot2 = ax.plot(buyPoints['Date'], buyPoints['Price'], 'g^')
-    for i, txt in enumerate(sellPoints['Quantity']):
-        # ax.annotate(str(txt), (mdates.date2num(sellPoints['Date'].iloc[i]), sellPoints['Price'].iloc[i]*.96))
-        ax.annotate(str(txt), (mdates.date2num(sellPoints['Date'].iloc[i]), sellPoints['Price'].iloc[i]),
-                    textcoords='offset points', xytext=(-8, -15))
-    for i, txt in enumerate(buyPoints['Quantity']):
-        # ax.annotate(str(txt), (mdates.date2num(buyPoints['Date'].iloc[i]), buyPoints['Price'].iloc[i]*.96))
-        ax.annotate(str(txt), (mdates.date2num(buyPoints['Date'].iloc[i]), buyPoints['Price'].iloc[i]),
-                    textcoords='offset points', xytext=(-8, -15))
-    plt.setp(plot1, markersize=10)
-    plt.setp(plot2, markersize=10)
-
-    titleStr = stock + ' Trades ( ' + startDate + ' to ' + endDate + ' )'
-    plt.title(titleStr)
-    plt.xlabel('Date')
-    plt.ylabel('Share Price')
-    plt.grid(True)
-    # plt.show()
+#
+# def analyzePeriod(stock, startDate, endDate):
+#     dataFrame = lookupPriceFromTable(stock, startDate, endDate)
+#     filteredDF = filterTransactions(startDate, endDate)
+#
+#     buyPoints = getBuySellPoints(stock, 'buy', filteredDF)
+#     sellPoints = getBuySellPoints(stock, 'sell', filteredDF)
+#
+#     # Moving averages (10, 50, 200)
+#     SMA20 = nDayMovingAverage(dataFrame, 20)
+#     SMA50 = nDayMovingAverage(dataFrame, 50)
+#     SMA200 = nDayMovingAverage(dataFrame, 200)
+#
+#     # 50-day RMS
+#
+#     RMS20 = nDayMovingStd(dataFrame, 20)
+#
+#     # fig, ax = plt.subplots()
+#     ax = plt
+#     ax.plot(dataFrame)
+#     ax.fill_between(dataFrame.index, SMA20 - 2 * RMS20, SMA20 + 2 * RMS20,
+#                     alpha=0.2, facecolor='#089FFF', antialiased=True, label='20-day moving RMS')
+#
+#     if dataFrame.size > 20:
+#         ax.plot(SMA20, '--', linewidth=1, label='20-day SMA')
+#     if dataFrame.size > 50:
+#         ax.plot(SMA50, '--', linewidth=1, label='50-day SMA')
+#     if dataFrame.size > 200:
+#         ax.plot(SMA200, '--', linewidth=1, label='200-day SMA')
+#
+#     ax.legend()
+#
+#     plot1 = ax.plot(sellPoints['Date'], sellPoints['Price'], 'rv')
+#     plot2 = ax.plot(buyPoints['Date'], buyPoints['Price'], 'g^')
+#     for i, txt in enumerate(sellPoints['Quantity']):
+#         # ax.annotate(str(txt), (mdates.date2num(sellPoints['Date'].iloc[i]), sellPoints['Price'].iloc[i]*.96))
+#         ax.annotate(str(txt), (mdates.date2num(sellPoints['Date'].iloc[i]), sellPoints['Price'].iloc[i]),
+#                     textcoords='offset points', xytext=(-8, -15))
+#     for i, txt in enumerate(buyPoints['Quantity']):
+#         # ax.annotate(str(txt), (mdates.date2num(buyPoints['Date'].iloc[i]), buyPoints['Price'].iloc[i]*.96))
+#         ax.annotate(str(txt), (mdates.date2num(buyPoints['Date'].iloc[i]), buyPoints['Price'].iloc[i]),
+#                     textcoords='offset points', xytext=(-8, -15))
+#     plt.setp(plot1, markersize=10)
+#     plt.setp(plot2, markersize=10)
+#
+#     titleStr = stock + ' Trades ( ' + startDate + ' to ' + endDate + ' )'
+#     plt.title(titleStr)
+#     plt.xlabel('Date')
+#     plt.ylabel('Share Price')
+#     plt.grid(True)
+#     # plt.show()
 
 
 def nDayMovingAverage(series, n):
@@ -478,16 +450,16 @@ def generateGainLossOverTime(startDate, endDate):
     gainLossSeries.index.name = 'Date'
     return gainLossSeries, VTICompare
 
-
-def plotGainLoss(startDate):
-    gainLossSeries, VTICompare = generateGainLossOverTime(startDate)
-    plt.plot(gainLossSeries, label='My Portfolio')
-    plt.plot(VTICompare, label='VTI Index')
-    plt.title('Gain/Loss Since ' + startDate)
-    plt.xlabel('Date')
-    plt.ylabel('Change in Value of Investments (% Mean Investment)')
-    plt.legend()
-    plt.show()
+#
+# def plotGainLoss(startDate):
+#     gainLossSeries, VTICompare = generateGainLossOverTime(startDate)
+#     plt.plot(gainLossSeries, label='My Portfolio')
+#     plt.plot(VTICompare, label='VTI Index')
+#     plt.title('Gain/Loss Since ' + startDate)
+#     plt.xlabel('Date')
+#     plt.ylabel('Change in Value of Investments (% Mean Investment)')
+#     plt.legend()
+#     plt.show()
 
 # generateChart('COST', '2017-01-01')
 # DF = generateAllCharts('2017-01-01')
