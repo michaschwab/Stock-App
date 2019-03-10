@@ -5,7 +5,6 @@ import json
 from fundamentals import *
 
 app = Flask(__name__)
-stringToday = str(date.today())
 
 
 @app.route('/')
@@ -43,6 +42,7 @@ def view_transactions():
 
 @app.route('/get-overview-table/')
 def overview_table():
+    stringToday = str(date.today())
     dataFrame = makeSummaryDF(stringToday)
     nonZeroDF = dataFrame.loc[dataFrame['Quantity'] != 0]
     # columnsDF = nonZeroDF.columns
@@ -103,7 +103,7 @@ def get_all_time_series(stockName):
 def get_gain_loss():
     startDate = request.args.get('start')
     endDate = request.args.get('end')
-    gainLossSeries, VTICompare = generateGainLossOverTime(startDate,endDate)
+    gainLossSeries, VTICompare = generateGainLossOverTime(startDate, endDate)
     csvGainLoss = gainLossSeries.to_csv(header=True)
     csvVTI = VTICompare.to_csv(header=True)
 

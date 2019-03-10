@@ -1,22 +1,24 @@
-import fix_yahoo_finance as yf
 import numpy as np
 from datetime import *
 from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import matplotlib.dates as mdates
-
+import importlib
 
 pd.options.mode.chained_assignment = None
 pd.set_option('display.max_columns', None)
+transactionsFileName = 'data.csv'
+lookupTableFilename = 'pricesLookup.csv'
+# yf = fix_yahoo_finance
 
 
 def reloadTransactions():
     global transactionsList
-    transactionsFileName = 'data.csv'
     fileInPath = Path(transactionsFileName)
     if fileInPath.exists():
         transactionsList = pd.read_csv('data.csv', sep='\t')
+        startUp()
     else:
         print("Nothing here!")
 
@@ -28,63 +30,146 @@ def getStocksList(dataFrame):
 
 
 def lookupPriceRange(tickerSymbolList, startDate, endDate):
+    import fix_yahoo_finance
+    fix_yahoo_finance = importlib.reload(fix_yahoo_finance)
     try:
-        data = yf.download(tickerSymbolList, start=startDate, end=endDate, as_panel=True)
+        data = fix_yahoo_finance.download(tickerSymbolList, start=startDate, end=endDate, as_panel=True)
         dataClose = data["Close"]
         print('DATA LOADED')
     except ValueError:
         print("Did not succesfully load data")
         dataClose = []
+
     return dataClose  # in form of dataframe
 
 
 def startUp():
-    transactionsFileName = 'data.csv'
     fileInPath = Path(transactionsFileName)
+    lookupTablePath = Path(lookupTableFilename)
     if fileInPath.exists():
-        transactionsListLocal = pd.read_csv('data.csv', sep='\t')
+        transactionsListLocal = pd.read_csv(transactionsFileName, sep='\t')
+        globalStocksList = getStocksList(transactionsListLocal).tolist()
+        todayDate = date.today()
+        fiveYearsAgo = todayDate - timedelta(days=5 * 365)
+
+        firstDateTransactions = pd.to_datetime(transactionsListLocal['Date']).min()
+        firstDate = min([firstDateTransactions.date(), fiveYearsAgo])
+        firstDateStr = firstDate.strftime('%Y-%m-%d')
+
+        todayStr = todayDate.strftime('%Y-%m-%d')
+        # check if file already exists, and if so, if file spans the date range that is required
+
+        if lookupTablePath.exists():
+            print('lookupexists')
+            globalLookupDFCurrent = pd.read_csv(lookupTableFilename, sep='\t', index_col=0)
+            globalLookupDFCurrent.index = pd.to_datetime(globalLookupDFCurrent.index)
+            globalLookupDFLocal = lookupOnlyDifference(globalLookupDFCurrent, globalStocksList, firstDate, todayDate)
+        else:
+            globalLookupDFLocal = lookupPriceRange(globalStocksList, firstDateStr, todayStr)
+            if len(globalStocksList) == 1:
+                series1 = globalLookupDFLocal
+                df = pd.DataFrame(index=series1.index, columns=[globalStocksList[0]], data=series1.values)
+                globalLookupDFLocal = df
+
+            updateLookupTable(lookupTableFilename, globalLookupDFLocal)
+
+        global globalLookupDF, transactionsList
+        transactionsList = transactionsListLocal
+        globalLookupDF = globalLookupDFLocal
     else:
         print("Nothing here!")
-    globalStocksList = getStocksList(transactionsListLocal).tolist()
-    todayDate = date.today()
-    fiveYearsAgo = todayDate - timedelta(days=5*365)
-    firstDateTransactions = pd.to_datetime(transactionsListLocal['Date']).min()
-    firstDate = min([firstDateTransactions.date(), fiveYearsAgo])
-    firstDateStr = firstDate.strftime('%Y-%m-%d')
-
-    todayStr = todayDate.strftime('%Y-%m-%d')
-    globalLookupDFLocal = lookupPriceRange(globalStocksList, firstDateStr, todayStr)
-    return transactionsListLocal, globalLookupDFLocal
 
 
-transactionsList, globalLookupDF = startUp()
+def updateLookupTable(path, newDF):
+    global globalLookupDF
+    globalLookupDF = newDF
+    newDF.to_csv(path, sep='\t')
+
+
+def prev_weekday(adate):
+    adate -= timedelta(days=1)
+    while adate.weekday() > 4:  # Mon-Fri are 0-4
+        adate -= timedelta(days=1)
+    return adate
+
+
+def lookupOnlyDifference(storedDF, stocksListRequested, firstDateObj, lastDateObj):
+
+    if isinstance(stocksListRequested, list):
+        stocksListRequested = stocksListRequested
+    else:
+        stocksListRequested = [stocksListRequested]
+
+    lastWeekday = prev_weekday(lastDateObj)
+    dateListObj = pd.to_datetime(storedDF.index)
+    minDateObj = dateListObj.min().date()
+    minDateObjMinus1 = minDateObj - timedelta(days=1)
+    maxDateObj = dateListObj.max().date()
+    maxDateObjPlus1 = maxDateObj + timedelta(days=1)
+    currentFirstDateStr = minDateObj.strftime('%Y-%m-%d')
+    currentLastDateStr = maxDateObj.strftime('%Y-%m-%d')
+    currentFirstDateMinus1Str = minDateObjMinus1.strftime('%Y-%m-%d')
+    currentLastDatePlus1Str = maxDateObjPlus1.strftime('%Y-%m-%d')
+    firstDateStr = firstDateObj.strftime('%Y-%m-%d')
+    lastDateStr = lastWeekday.strftime('%Y-%m-%d')
+    currentStocksList = storedDF.columns.values.tolist()
+    if firstDateObj >= minDateObj and lastWeekday <= maxDateObj and set(stocksListRequested).issubset(currentStocksList):
+        print('got here')
+        outputDFLocal = storedDF
+    else:
+        # lookup only the new stocks with original dates
+        if not set(stocksListRequested).issubset(currentStocksList):
+            print('we here')
+            diffStocksList = list(set(stocksListRequested) - set(currentStocksList))
+            lengthNewStocks = len(diffStocksList)
+            newStocksDF = lookupPriceRange(diffStocksList, currentFirstDateStr, currentLastDateStr)
+            if lengthNewStocks == 1:
+                newStocksDF.name = diffStocksList[0]
+
+            storedDF = pd.concat([storedDF, newStocksDF], axis=1, join_axes=[storedDF.index])
+
+        # now lookup new date ranges
+        updatedStocksList = storedDF.columns.values.tolist()
+        if firstDateObj < minDateObj:
+            print('no here')
+            newDatesDF1 = lookupPriceRange(updatedStocksList, firstDateStr, currentFirstDateMinus1Str)
+            storedDF = pd.concat([storedDF, newDatesDF1], axis=0, join='outer', sort=True)
+            storedDF.sort_index(axis=0, inplace=True)
+            storedDF = storedDF[~storedDF.index.duplicated(keep='first')]
+        if lastWeekday > maxDateObj:
+            print('finally')
+            newDatesDF2 = lookupPriceRange(updatedStocksList, currentLastDatePlus1Str, lastDateStr)
+            storedDF = pd.concat([storedDF, newDatesDF2], axis=0, join='outer', sort=True)
+            storedDF.sort_index(axis=0, inplace=True)
+            storedDF = storedDF[~storedDF.index.duplicated(keep='first')]
+        outputDFLocal = storedDF
+
+        updateLookupTable(lookupTableFilename, outputDFLocal)
+    return outputDFLocal
+
+
+startUp()
+
+
+def lookupPriceFromTableOnly(tickerSymbolList, startDate, endDate):
+    startDate = pd.to_datetime(startDate)
+    endDate = pd.to_datetime(endDate)
+    df1 = globalLookupDF[tickerSymbolList]
+    df = df1[(df1.index >= startDate) & (df1.index <= endDate)]
+    df_nonan = df.dropna()
+
+    return df_nonan
 
 
 def lookupPriceFromTable(tickerSymbolList, startDate, endDate):
-    startDate = pd.to_datetime(startDate)
-    endDate = pd.to_datetime(endDate)
-    # if stock is in the database look it up in database otherwise look it up online
-    dfKeys = globalLookupDF.keys().tolist()
 
-    if isinstance(tickerSymbolList, str):
-        condition = tickerSymbolList in dfKeys
-    else:
-        condition = all(elem in dfKeys for elem in tickerSymbolList)
+    # this is distinguished currently from the script lookupOnlyDifference because that script updates the data base each search and I'm not sure that's what we want here
+    startDate = pd.to_datetime(startDate).date()
+    endDate = pd.to_datetime(endDate).date()
 
-    todayDate = date.today()
-    fiveYearsAgo = todayDate - timedelta(days=5*365)
-    startDateObj = pd.to_datetime(startDate).date()
-
-    inDBRange = startDateObj > fiveYearsAgo
-
-    if condition and inDBRange:
-        df1 = globalLookupDF[tickerSymbolList]
-        df = df1[(df1.index >= startDate) & (df1.index <= endDate)]
-    else:
-        df1 = lookupPriceRange(tickerSymbolList, startDate, endDate)
-        df1.name = tickerSymbolList
-        df = df1
-
+    wholeDF = lookupOnlyDifference(globalLookupDF, tickerSymbolList, startDate, endDate)
+    df1 = wholeDF[tickerSymbolList]
+    df = df1[(df1.index.date >= startDate) & (df1.index.date <= endDate)]
     df_nonan = df.dropna()
     return df_nonan
 
@@ -92,7 +177,7 @@ def lookupPriceFromTable(tickerSymbolList, startDate, endDate):
 def currentPrices(tickerSymbolList, thisDay):
     # today = date.today()
     aWeekAgo = pd.to_datetime(thisDay) - timedelta(days=4)
-    oneWeekData = lookupPriceFromTable(tickerSymbolList, aWeekAgo, thisDay)
+    oneWeekData = lookupPriceFromTableOnly(tickerSymbolList, aWeekAgo, thisDay)
     lastData = oneWeekData.iloc[-1]
     return lastData
 
@@ -101,7 +186,8 @@ def filterTransactions(startDate, endDate):
     startDate = pd.to_datetime(startDate)
     endDate = pd.to_datetime(endDate)
     transactionsList['Date'] = pd.to_datetime(transactionsList['Date'])
-    filteredTransactions = transactionsList.loc[(startDate <= transactionsList['Date']) & (transactionsList['Date'] <= endDate)]
+    filteredTransactions = transactionsList.loc[
+        (startDate <= transactionsList['Date']) & (transactionsList['Date'] <= endDate)]
     return filteredTransactions
 
 
@@ -135,7 +221,8 @@ def getQuantitySold(stocksNameList, dataFrame):
 
 
 def getCurrentQuantities(stocksNameList, dataFrame):
-    stockHoldings = np.array(getQuantityBought(stocksNameList, dataFrame))-np.array(getQuantitySold(stocksNameList, dataFrame))
+    stockHoldings = np.array(getQuantityBought(stocksNameList, dataFrame)) - np.array(
+        getQuantitySold(stocksNameList, dataFrame))
     return stockHoldings
 
 
@@ -167,6 +254,7 @@ def getCurrentValue(stocksNameList, stockHoldings, thisDay):
     valueList = stockHoldings * pricesToday
     return valueList
 
+
 # ------------------------------------------------------------------
 # Overview Scripts
 
@@ -181,12 +269,12 @@ def makeSummaryDF(thisDay):
     soldQuant = getQuantitySold(names, transactions)
     pricesToday = currentPrices(names, thisDay)
 
-    avgBuyPrice = spentOnly/boughtQuant
+    avgBuyPrice = spentOnly / boughtQuant
 
     currentVal = np.round(getCurrentValue(names, quantities, thisDay), 2)
-    spentOnPosition = avgBuyPrice*quantities
+    spentOnPosition = avgBuyPrice * quantities
     gainLossCumulative = np.round(currentVal - spentOnly + earnedOnly, 2)
-    gainLossPercent = np.round((currentVal-spentOnPosition)/spentOnPosition*100,1)
+    gainLossPercent = np.round((currentVal - spentOnPosition) / spentOnPosition * 100, 1)
 
     df = pd.DataFrame(columns=['Stock Symbol', 'Quantity', 'Current Price', 'Current Value', 'Current Gain/Loss %',
                                'Cumulative Gain/Loss $'],
@@ -203,14 +291,12 @@ def makeSummaryDF(thisDay):
 
 def calcTotalGainLoss(df):
     totalGainLoss = np.round(df['Cumulative Gain/Loss $'].sum(), 2)
-    print(totalGainLoss)
     return totalGainLoss
 
 
 def plotTotalHoldings(summaryDF):
     # Data to plot
     nonZeroDF = summaryDF.loc[summaryDF['Quantity'] != 0]
-    print(nonZeroDF)
 
     labels = nonZeroDF['Stock Symbol']
     sizes = nonZeroDF['Current Value']
@@ -259,7 +345,7 @@ def analyzePeriod(stock, startDate, endDate):
     # fig, ax = plt.subplots()
     ax = plt
     ax.plot(dataFrame)
-    ax.fill_between(dataFrame.index, SMA20 - 2*RMS20, SMA20 + 2*RMS20,
+    ax.fill_between(dataFrame.index, SMA20 - 2 * RMS20, SMA20 + 2 * RMS20,
                     alpha=0.2, facecolor='#089FFF', antialiased=True, label='20-day moving RMS')
 
     if dataFrame.size > 20:
@@ -305,7 +391,7 @@ def nDayMovingAverage(series, n):
 def calcTrailingStopSegment(series, percent, startDate):
     startDate = pd.to_datetime(startDate)
     seriesFiltered = series.loc[series.index > startDate]
-    stopSeries = (1-percent/100)*seriesFiltered
+    stopSeries = (1 - percent / 100) * seriesFiltered
     stopLine = []
     maxVal = 0
     for i, elem in enumerate(stopSeries):
@@ -359,38 +445,16 @@ def nDayMovingStd(series, n):
     return simpleMovingStd
 
 
-def generateAllCharts(startDate):
-    stringToday = str(date.today())
-    dataFrame = makeSummaryDF(stringToday)
-    stockNames = dataFrame['Stock Symbol']
-    for i, stock in enumerate(stockNames):
-        plt.figure(i)
-        analyzePeriod(stock, startDate, stringToday)
-
-    plt.show()
-    return dataFrame
-
-
-def generateChart(name, startDate):
-    stringToday = str(date.today())
-    # startDate = '2017-01-01'
-    plt.figure(0)
-    analyzePeriod(name, startDate, stringToday)
-    plt.show()
-
-
 def generateGainLossOverTime(startDate, endDate):
     # stringToday = str(date.today())
     # startDate = '2017-02-01'
     startDateObj = pd.to_datetime(startDate)
     endDateObj = pd.to_datetime(endDate)
-    diffDays = pd.Timedelta(endDateObj-startDateObj).days
-    print(diffDays)
+    diffDays = pd.Timedelta(endDateObj - startDateObj).days
 
     nPoints = 50
-    frequency = max(round(diffDays/nPoints), 1)
-    freqString = str(frequency)+'D'
-    print(freqString)
+    frequency = max(round(diffDays / nPoints), 1)
+    freqString = str(frequency) + 'D'
 
     rangeDate = pd.date_range(start=startDate, end=endDate, freq=freqString)
     datesPy = rangeDate.to_pydatetime()
@@ -400,7 +464,6 @@ def generateGainLossOverTime(startDate, endDate):
     totalValue = []
     for i, eachDate in enumerate(datesPy):
         stringDate = eachDate.strftime('%Y-%m-%d')
-        print(stringDate)
         dataFrame = makeSummaryDF(stringDate)
         gainLossDay = calcTotalGainLoss(dataFrame)
         totalValueDay = dataFrame['Current Value'].sum()
@@ -408,8 +471,8 @@ def generateGainLossOverTime(startDate, endDate):
         gainLoss.append(gainLossDay)
 
     meanValue = np.mean(totalValue)
-    gainLossPercent = ((gainLoss-gainLoss[0])/meanValue)*100
-    VTICompare = ((VTICompare - VTICompare[0])/VTICompare[0])*100
+    gainLossPercent = ((gainLoss - gainLoss[0]) / meanValue) * 100
+    VTICompare = ((VTICompare - VTICompare[0]) / VTICompare[0]) * 100
 
     gainLossSeries = pd.Series(data=gainLossPercent, index=rangeDate, name='Gain/Loss')
     gainLossSeries.index.name = 'Date'
@@ -434,4 +497,3 @@ def plotGainLoss(startDate):
 # DF = makeSummaryDF(stringToday)
 # plotGainLoss('2017-01-01')
 # plotTotalHoldings(DF)
-

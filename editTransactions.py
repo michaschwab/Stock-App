@@ -2,6 +2,7 @@ from datetime import *
 from pathlib import Path
 import pandas as pd
 import numpy as np
+from analyzeStocks import startUp
 
 transactionsFileName = 'data.csv'
 fileInPath = Path(transactionsFileName)
@@ -16,7 +17,6 @@ def deleteTransaction(row):
 
     transactionsList = transactionsList.drop(row)
     # transactionsList.index = range(len(transactionsList.index))
-    print(transactionsList)
     transactionsList.to_csv('data.csv', sep='\t', index=False)
 
 
@@ -47,7 +47,7 @@ def addNewTransaction():
 
 def addNewTransactionNoPrompt(typeInput, dateInput, stockInput, quantInput, priceInput):
     todayDate = date.today
-    columnNames = ['Type', 'Date', 'Stock Symbol', 'Quantity', 'Price', 'Total Amount']
+    columnNames = ['Date', 'Type', 'Stock Symbol', 'Quantity', 'Price', 'Total Amount']
     if fileInPath.exists():
         transactionsList = pd.read_csv('data.csv', sep='\t')
     else:
@@ -63,13 +63,13 @@ def addNewTransactionNoPrompt(typeInput, dateInput, stockInput, quantInput, pric
     transactionsList.loc[indexNew] = [dateInput, typeInput, stockInput, quantInput, priceInput,
                                       calcCost]
     transactionsList.to_csv('data.csv', sep='\t', index=False)
+
     return indexNew
 
 
 def viewTransactions():
     if fileInPath.exists():
         transactionsList = pd.read_csv('data.csv', sep='\t')
-        print(transactionsList)
     else:
         print("Nothing to see!")
     return transactionsList

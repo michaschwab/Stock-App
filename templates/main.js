@@ -372,8 +372,6 @@ function drawGraph(priceData,buyData,sellData,SMA20Data,SMA200Data,RMS20Data,tra
 }
 
 
-
-
 function drawFundamentals(data,trends,stock) {
 
     var graphAreaElement = document.getElementById("largeGraphArea");
@@ -505,94 +503,6 @@ function drawFundamentals(data,trends,stock) {
         }
     }
 }
-//
-//function drawGraphFundamentals(data,stock){
-//
-//    var divEl = document.getElementById("fundamentalsGraph");
-//    divEl.innerHTML = "";
-//    var chart = new StockLineChart(stock, "fundamentalsGraph");
-//    var parseTime = d3.timeParse("%Y-%m");
-//    var bookUSD = data.map(function(obj) {
-//        return {
-//            date: parseTime(obj.Date),
-//            close: obj['Book Value Per Share']
-//        }
-//    })
-//
-//    var earningsUSD = data.map(function(obj) {
-//        return {
-//            date: parseTime(obj.Date),
-//            close: obj['Earnings Per Share']
-//        }
-//    })
-//
-//    var revenuePerShare = data.map(function(obj) {
-//        var shares = +obj['Shares (Mil)'];
-//        var revenue = +obj['Revenue (Mil)'];
-//        var revPerShare = revenue/shares;
-//        return {
-//            date: parseTime(obj.Date),
-//            close: revPerShare
-//        }
-//    })
-//
-//    var dividendUSD = data.map(function(obj) {
-//        return {
-//            date: parseTime(obj.Date),
-//            close: obj['Dividends USD']
-//        }
-//    })
-//
-////    var bookUSD = data, earningsUSD= data, revenuePerShare= data, dividendUSD=data
-//
-//
-//
-//    console.log(bookUSD)
-//
-//
-//    chart.addLine(earningsUSD, 'Earnings', {
-//        mark: 'circle',
-//        markSize: 5,
-//        showValue: function(date, value) {
-//            return monthNames[date.getMonth()].substr(0,3) + ', ' +date.getFullYear() +': $' + value;
-//        }
-//    });
-//
-//
-//    chart.addLine(bookUSD, 'Book-Val', {
-//        mark: 'circle',
-//        markSize: 5,
-//        showValue: function(date, value) {
-//            return monthNames[date.getMonth()].substr(0,3) + ', ' +date.getFullYear() +': $' + value;
-//        }
-//    });
-//
-//
-//    chart.addLine(dividendUSD, 'Dividend', {
-//        mark: 'circle',
-//        markSize: 5,
-//        showValue: function(date, value) {
-//            return monthNames[date.getMonth()].substr(0,3) + ', ' +date.getFullYear() +': $' + value;
-//        }
-//    });
-//
-//
-//    chart.addLine(revenuePerShare, 'Revenue', {
-//        mark: 'circle',
-//        markSize: 5,
-//        showValue: function(date, value) {
-//            return monthNames[date.getMonth()].substr(0,3) + ', ' +date.getFullYear() +': $' + value;
-//        }
-//    });
-//
-//    var monthNames = [
-//        "January", "February", "March",
-//        "April", "May", "June", "July",
-//        "August", "September", "October",
-//        "November", "December"
-//    ];
-//
-//}
 
 
 function tabulate(data, columns) {
@@ -643,7 +553,6 @@ function tabulate(data, columns) {
 	}
 
 function startUp() {
-    view_transactions()
     var today = new Date();
     var dd = today.getDate();
     var mm = today.getMonth() + 1; //January is 0!
