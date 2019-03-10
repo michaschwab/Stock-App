@@ -2,7 +2,7 @@ from datetime import *
 from pathlib import Path
 import pandas as pd
 import numpy as np
-from analyzeStocks import startUp
+
 
 transactionsFileName = 'data.csv'
 fileInPath = Path(transactionsFileName)

@@ -51,16 +51,20 @@ def startUp():
         globalStocksList = getStocksList(transactionsListLocal).tolist()
         todayDate = date.today()
         fiveYearsAgo = todayDate - timedelta(days=5 * 365)
+        if len(globalStocksList) == 0:
+            print('It is empty!')
+            firstDate = fiveYearsAgo
+            # this is just to put a default date
+        else:
+            firstDateTransactions = pd.to_datetime(transactionsListLocal['Date']).min()
+            firstDate = min([firstDateTransactions.date(), fiveYearsAgo])
 
-        firstDateTransactions = pd.to_datetime(transactionsListLocal['Date']).min()
-        firstDate = min([firstDateTransactions.date(), fiveYearsAgo])
         firstDateStr = firstDate.strftime('%Y-%m-%d')
 
         todayStr = todayDate.strftime('%Y-%m-%d')
         # check if file already exists, and if so, if file spans the date range that is required
 
         if lookupTablePath.exists():
-            print('lookupexists')
             globalLookupDFCurrent = pd.read_csv(lookupTableFilename, sep='\t', index_col=0)
             globalLookupDFCurrent.index = pd.to_datetime(globalLookupDFCurrent.index)
             globalLookupDFLocal = lookupOnlyDifference(globalLookupDFCurrent, globalStocksList, firstDate, todayDate)
@@ -114,12 +118,10 @@ def lookupOnlyDifference(storedDF, stocksListRequested, firstDateObj, lastDateOb
     lastDateStr = lastWeekday.strftime('%Y-%m-%d')
     currentStocksList = storedDF.columns.values.tolist()
     if firstDateObj >= minDateObj and lastWeekday <= maxDateObj and set(stocksListRequested).issubset(currentStocksList):
-        print('got here')
         outputDFLocal = storedDF
     else:
         # lookup only the new stocks with original dates
         if not set(stocksListRequested).issubset(currentStocksList):
-            print('we here')
             diffStocksList = list(set(stocksListRequested) - set(currentStocksList))
             lengthNewStocks = len(diffStocksList)
             newStocksDF = lookupPriceRange(diffStocksList, currentFirstDateStr, currentLastDateStr)
@@ -131,13 +133,11 @@ def lookupOnlyDifference(storedDF, stocksListRequested, firstDateObj, lastDateOb
         # now lookup new date ranges
         updatedStocksList = storedDF.columns.values.tolist()
         if firstDateObj < minDateObj:
-            print('no here')
             newDatesDF1 = lookupPriceRange(updatedStocksList, firstDateStr, currentFirstDateMinus1Str)
             storedDF = pd.concat([storedDF, newDatesDF1], axis=0, join='outer', sort=True)
             storedDF.sort_index(axis=0, inplace=True)
             storedDF = storedDF[~storedDF.index.duplicated(keep='first')]
         if lastWeekday > maxDateObj:
-            print('finally')
             newDatesDF2 = lookupPriceRange(updatedStocksList, currentLastDatePlus1Str, lastDateStr)
             storedDF = pd.concat([storedDF, newDatesDF2], axis=0, join='outer', sort=True)
             storedDF.sort_index(axis=0, inplace=True)
